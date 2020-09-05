@@ -82,6 +82,16 @@ class LGTMSite:
         }
         self._make_lgtm_post(url, data)
 
+    def unfollow_repository_by_org(self, org: str):
+        projects = self.get_my_projects()
+        projects_sorted = LGTMDataFilters.org_to_ids(projects)
+        if org not in projects_sorted:
+            print('org %s not found in projects list' % org)
+            return
+        projects_under_org = projects_sorted[org]
+        for project in projects_under_org:
+            self.unfollow_repository_by_id(project['key'])
+
     @staticmethod
     def retrieve_project_id(gh_project_path: str) -> Optional[int]:
         url = "https://lgtm.com/api/v1.0/projects/g/" + gh_project_path
