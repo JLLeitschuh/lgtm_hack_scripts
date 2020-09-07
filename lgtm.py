@@ -129,6 +129,13 @@ class LGTMSite:
         url = 'https://lgtm.com/internal_api/v0.2/getUsedProjectSelections'
         return self._make_lgtm_post(url, {})
 
+    def get_project_list_by_name(self, list_name: str) -> Optional[int]:
+        project_lists = self.get_project_lists()
+        for project_list in project_lists:
+            if project_list['name'] == list_name:
+                return int(project_list['key'])
+        return None
+
     def create_project_list(self, name: str) -> int:
         """
         :param name: Name of the project list to create.
