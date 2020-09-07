@@ -5,6 +5,10 @@ import requests
 import yaml
 
 
+class LGTMRequestException(Exception):
+    pass
+
+
 @dataclass
 class LGTMSite:
     nonce: str
@@ -37,11 +41,10 @@ class LGTMSite:
         if data['status'] == 'success':
             return data['data']
         else:
-            raise Exception('LGTM GET request failed with response: %s' % str(data))
+            raise LGTMRequestException('LGTM GET request failed with response: %s' % str(data))
 
     def get_my_projects_under_org(self, org: str) -> List['SimpleProject']:
-        projects = self.get_my_projects()
-        projects_sorted = LGTMDataFilters.org_to_ids(projects)
+        projects_sorted = LGTMDataFilters.org_to_ids(self.get_my_projects())
         return LGTMDataFilters.extract_project_under_org(org, projects_sorted)
 
     def _make_lgtm_post(self, url: str, data: dict) -> dict:
@@ -64,9 +67,9 @@ class LGTMSite:
             else:
                 return {}
         else:
-            raise Exception('LGTM POST request failed with response: %s' % str(data))
+            raise LGTMRequestException('LGTM POST request failed with response: %s' % str(data_returned))
 
-    def load_into_project_list(self, into_project: int, lgtm_project_ids: List[int]):
+    def load_into_project_list(self, into_project: int, lgtm_project_ids: List[str]):
         url = "https://lgtm.com/internal_api/v0.2/updateProjectSelection"
         # Because LGTM uses some wacky format for it's application/x-www-form-urlencoded data
         list_serialized = ', '.join([('"' + str(elem) + '"') for elem in lgtm_project_ids])
@@ -77,6 +80,25 @@ class LGTMSite:
         }
         self._make_lgtm_post(url, data)
 
+    def force_rebuild_all_proto_projects(self):
+        org_to_projects = LGTMDataFilters.org_to_ids(self.get_my_projects())
+        for org in org_to_projects:
+            for project in org_to_projects[org]:
+                if not project.is_protoproject:
+                    continue
+                self.force_rebuild_project(project)
+
+    def force_rebuild_project(self, simple_project: 'SimpleProject'):
+        url = 'https://lgtm.com/internal_api/v0.2/rebuildProtoproject'
+        data = {
+            **simple_project.make_post_data(),
+            'config': ''
+        }
+        try:
+            self._make_lgtm_post(url, data)
+        except LGTMRequestException:
+            print('Failed rebuilding project. This may be because it is already being built. `%s`' % simple_project)
+
     def follow_repository(self, repository_url: str):
         url = "https://lgtm.com/internal_api/v0.2/followProject"
         data = {
@@ -85,19 +107,23 @@ class LGTMSite:
         }
         self._make_lgtm_post(url, data)
 
-    def unfollow_repository_by_id(self, project_id: int):
+    def unfollow_repository_by_id(self, project_id: str):
         url = "https://lgtm.com/internal_api/v0.2/unfollowProject"
         data = {
             'project_key': project_id,
-            'apiVersion': self.api_version
         }
+        self._make_lgtm_post(url, data)
+
+    def unfollow_repository(self, simple_project: 'SimpleProject'):
+        url = "https://lgtm.com/internal_api/v0.2/unfollowProject"
+        data = simple_project.make_post_data()
         self._make_lgtm_post(url, data)
 
     def unfollow_repository_by_org(self, org: str):
         projects_under_org = self.get_my_projects_under_org(org)
         for project in projects_under_org:
             print('Unfollowing project %s' % project.display_name)
-            self.unfollow_repository_by_id(project.key)
+            self.unfollow_repository(project)
 
     def get_project_lists(self):
         url = 'https://lgtm.com/internal_api/v0.2/getUsedProjectSelections'
@@ -152,7 +178,14 @@ class LGTMSite:
 @dataclass
 class SimpleProject:
     display_name: str
-    key: int
+    key: str
+    is_protoproject: bool
+
+    def make_post_data(self):
+        data_dict_key = 'protoproject_key' if self.is_protoproject else 'project_key'
+        return {
+            data_dict_key: self.key
+        }
 
 
 class LGTMDataFilters:
@@ -165,16 +198,32 @@ class LGTMDataFilters:
         """
         org_to_ids = {}
         for project in projects:
+            org: str
+            display_name: str
+            key: str
+            is_protoproject: bool
             if 'protoproject' in project:
-                print('skipping %s' % project['protoproject']['displayName'])
-                continue
-            if 'realProject' not in project:
-                raise KeyError('\'realProject\' not in %s' % str(project))
-            the_project = project['realProject'][0]
-            if the_project['repoProvider'] != 'github_apps':
-                # Not really concerned with BitBucket right now
-                continue
-            org = str(the_project['slug']).split('/')[1]
+                the_project = project['protoproject']
+                if 'https://github.com/' not in the_project['cloneUrl']:
+                    # Not really concerned with BitBucket right now
+                    continue
+                display_name = the_project['displayName']
+                org = display_name.split('/')[0]
+                key = the_project['key']
+                is_protoproject = True
+            elif 'realProject' in project:
+
+                the_project = project['realProject'][0]
+                if the_project['repoProvider'] != 'github_apps':
+                    # Not really concerned with BitBucket right now
+                    continue
+                org = str(the_project['slug']).split('/')[1]
+                display_name = the_project['displayName']
+                key = the_project['key']
+                is_protoproject = False
+            else:
+                raise KeyError('\'realProject\' nor \'protoproject\' in %s' % str(project))
+
             ids_list: List[SimpleProject]
             if org in org_to_ids:
                 ids_list = org_to_ids[org]
@@ -182,8 +231,9 @@ class LGTMDataFilters:
                 ids_list = []
                 org_to_ids[org] = ids_list
             ids_list.append(SimpleProject(
-                display_name=the_project['displayName'],
-                key=the_project['key']
+                display_name=display_name,
+                key=key,
+                is_protoproject=is_protoproject
             ))
 
         return org_to_ids
