@@ -115,13 +115,17 @@ class LGTMSite:
         self._make_lgtm_post(url, data)
 
     def unfollow_repository(self, simple_project: 'SimpleProject'):
-        url = "https://lgtm.com/internal_api/v0.2/unfollowProject"
+        url = "https://lgtm.com/internal_api/v0.2/unfollowProject" if not simple_project.is_protoproject \
+            else "https://lgtm.com/internal_api/v0.2/unfollowProtoproject"
         data = simple_project.make_post_data()
         self._make_lgtm_post(url, data)
 
-    def unfollow_repository_by_org(self, org: str):
+    def unfollow_repository_by_org(self, org: str, include_protoproject: bool = False):
         projects_under_org = self.get_my_projects_under_org(org)
         for project in projects_under_org:
+            if not include_protoproject and project.is_protoproject:
+                print("Not unfollowing project since it is a protoproject. %s" % project)
+                continue
             print('Unfollowing project %s' % project.display_name)
             self.unfollow_repository(project)
 
@@ -135,6 +139,15 @@ class LGTMSite:
             if project_list['name'] == list_name:
                 return int(project_list['key'])
         return None
+
+    def get_or_create_project_list(self, list_name: str) -> int:
+        project_list_id = self.get_project_list_by_name(list_name)
+        if project_list_id is not None:
+            print('Found Project List with name: %s' % list_name)
+        else:
+            print('Creating Project List with name: %s' % list_name)
+            project_list_id = self.create_project_list(list_name)
+        return project_list_id
 
     def create_project_list(self, name: str) -> int:
         """
