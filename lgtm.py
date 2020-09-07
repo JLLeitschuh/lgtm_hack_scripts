@@ -39,6 +39,11 @@ class LGTMSite:
         else:
             raise Exception('LGTM GET request failed with response: %s' % str(data))
 
+    def get_my_projects_under_org(self, org: str) -> List['SimpleProject']:
+        projects = self.get_my_projects()
+        projects_sorted = LGTMDataFilters.org_to_ids(projects)
+        return LGTMDataFilters.extract_project_under_org(org, projects_sorted)
+
     def _make_lgtm_post(self, url: str, data: dict) -> dict:
         api_data = {
             'apiVersion': self.api_version
@@ -53,12 +58,18 @@ class LGTMSite:
         )
         data_returned = r.json()
         print(data_returned)
-        return data_returned
+        if data_returned['status'] == 'success':
+            if 'data' in data_returned:
+                return data_returned['data']
+            else:
+                return {}
+        else:
+            raise Exception('LGTM POST request failed with response: %s' % str(data))
 
-    def load_into_project_list(self, into_project: int, lgtm_project_ids: List[str]):
+    def load_into_project_list(self, into_project: int, lgtm_project_ids: List[int]):
         url = "https://lgtm.com/internal_api/v0.2/updateProjectSelection"
         # Because LGTM uses some wacky format for it's application/x-www-form-urlencoded data
-        list_serialized = ', '.join([('"' + elem + '"') for elem in lgtm_project_ids])
+        list_serialized = ', '.join([('"' + str(elem) + '"') for elem in lgtm_project_ids])
         data = {
             'projectSelectionId': into_project,
             'addedProjects': '[' + list_serialized + ']',
@@ -83,14 +94,37 @@ class LGTMSite:
         self._make_lgtm_post(url, data)
 
     def unfollow_repository_by_org(self, org: str):
-        projects = self.get_my_projects()
-        projects_sorted = LGTMDataFilters.org_to_ids(projects)
-        if org not in projects_sorted:
-            print('org %s not found in projects list' % org)
-            return
-        projects_under_org = projects_sorted[org]
+        projects_under_org = self.get_my_projects_under_org(org)
         for project in projects_under_org:
-            self.unfollow_repository_by_id(project['key'])
+            print('Unfollowing project %s' % project.display_name)
+            self.unfollow_repository_by_id(project.key)
+
+    def get_project_lists(self):
+        url = 'https://lgtm.com/internal_api/v0.2/getUsedProjectSelections'
+        return self._make_lgtm_post(url, {})
+
+    def create_project_list(self, name: str) -> int:
+        """
+        :param name: Name of the project list to create.
+        :return: The key id for this project.
+        """
+        url = 'https://lgtm.com/internal_api/v0.2/createProjectSelection'
+        data = {
+            'name': name
+        }
+        response = self._make_lgtm_post(url, data)
+        return int(response['key'])
+
+    def add_org_to_project_list_by_list_key(self, org: str, project_list_key: int):
+        projects_under_org = self.get_my_projects_under_org(org)
+        ids = []
+        for project in projects_under_org:
+            print('Adding `%s` project to project list' % project.display_name)
+            ids.append(project.key)
+        self.load_into_project_list(project_list_key, ids)
+
+    def add_org_to_project_list_by_list_name(self, org: str, project_name: str):
+        pass
 
     @staticmethod
     def retrieve_project_id(gh_project_path: str) -> Optional[int]:
@@ -115,10 +149,16 @@ class LGTMSite:
             )
 
 
+@dataclass
+class SimpleProject:
+    display_name: str
+    key: int
+
+
 class LGTMDataFilters:
 
     @staticmethod
-    def org_to_ids(projects: List[Dict]) -> Dict[str, List[Dict]]:
+    def org_to_ids(projects: List[Dict]) -> Dict[str, List[SimpleProject]]:
         """
         Converts the output from :func:`~lgtm.LGTMSite.get_my_projects` into a dic of GH org
         to list of projects including their GH id and LGTM id.
@@ -135,15 +175,22 @@ class LGTMDataFilters:
                 # Not really concerned with BitBucket right now
                 continue
             org = str(the_project['slug']).split('/')[1]
-            ids_list: List[Dict]
+            ids_list: List[SimpleProject]
             if org in org_to_ids:
                 ids_list = org_to_ids[org]
             else:
                 ids_list = []
                 org_to_ids[org] = ids_list
-            ids_list.append({
-                'display_name': the_project['displayName'],
-                'key': the_project['key']
-            })
+            ids_list.append(SimpleProject(
+                display_name=the_project['displayName'],
+                key=the_project['key']
+            ))
 
         return org_to_ids
+
+    @staticmethod
+    def extract_project_under_org(org: str, projects_sorted: Dict[str, List[SimpleProject]]) -> List[SimpleProject]:
+        if org not in projects_sorted:
+            print('org %s not found in projects list' % org)
+            return []
+        return projects_sorted[org]
