@@ -59,7 +59,12 @@ class LGTMSite:
             cookies=self._cookies(),
             headers=self._headers()
         )
-        data_returned = r.json()
+        try:
+            data_returned = r.json()
+        except ValueError as e:
+            response_text = r.text
+            raise LGTMRequestException(f'Failed to parse JSON. Response was: {response_text}') from e
+
         print(data_returned)
         if data_returned['status'] == 'success':
             if 'data' in data_returned:
@@ -173,10 +178,14 @@ class LGTMSite:
         pass
 
     @staticmethod
-    def retrieve_project_id(gh_project_path: str) -> Optional[int]:
+    def retrieve_project(gh_project_path: str):
         url = "https://lgtm.com/api/v1.0/projects/g/" + gh_project_path
         r = requests.get(url)
-        data_returned = r.json()
+        return r.json()
+
+    @staticmethod
+    def retrieve_project_id(gh_project_path: str) -> Optional[int]:
+        data_returned = LGTMSite.retrieve_project(gh_project_path)
         if 'id' in data_returned:
             return int(data_returned["id"])
         else:
