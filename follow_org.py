@@ -20,7 +20,7 @@ def load_repository_list(org: str) -> List[str]:
 
     repos_to_load: List[str] = []
     for repo in repos:
-        if not repo.archived and repo.language in ['Kotlin', 'Groovy', 'Java']:
+        if not repo.archived and not repo.fork and repo.language in ['Kotlin', 'Groovy', 'Java']:
             print("Adding: " + repo.full_name)
             repos_to_load.append(repo.full_name)
 

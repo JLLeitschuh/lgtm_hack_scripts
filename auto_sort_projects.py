@@ -7,6 +7,7 @@ project_list_name_to_gh_org = {
         'google',
         'GoogleCloudPlatform',
         'GoogleContainerTools',
+        'googleapis',
     ],
     'Apache_Projects': ['apache'],
     'AirBnB_Projects': ['airbnb'],
@@ -23,13 +24,17 @@ project_list_name_to_gh_org = {
     'Graphite_Projects': ['graphite-project'],
     'Openmrs_Projects': ['openmrs'],
     'JetBrains_Projects': ['JetBrains'],
-    'Eclipse_Projects': ['eclipse'],
+    'Eclipse_Projects': [
+        'eclipse',
+        'eclipse-ee4j',
+    ],
     'Microsoft_Projects': ['microsoft'],
     'PayPal_Projects': ['paypal'],
     'Spinnaker_Projects': ['spinnaker'],
     'Elastic_Projects': ['elastic'],
     'Facebook_Projects': ['facebook'],
-    'DataDog_Projects': ['DataDog']
+    'DataDog_Projects': ['DataDog'],
+    'Micronaut_Projects': ['micronaut-projects']
 }
 
 # Flip the list
