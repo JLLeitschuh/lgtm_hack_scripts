@@ -34,7 +34,8 @@ project_list_name_to_gh_org = {
     'Elastic_Projects': ['elastic'],
     'Facebook_Projects': ['facebook'],
     'DataDog_Projects': ['DataDog'],
-    'Micronaut_Projects': ['micronaut-projects']
+    'Micronaut_Projects': ['micronaut-projects'],
+    'Apple_Projects': ['apple'],
 }
 
 # Flip the list
