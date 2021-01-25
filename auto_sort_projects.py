@@ -38,6 +38,20 @@ project_list_name_to_gh_org = {
     'Apple_Projects': ['apple'],
 }
 
+project_list_to_repo = {
+    'jOOq-Users': [
+        'self-xdsd/self-storage',
+        'folio-org/mod-source-record-storage',
+        'ICIJ/datashare',
+        'hartwigmedical/hmftools',
+        'openforis/collect',
+        'jklingsporn/vertx-jooq',
+        'trib3/leakycauldron',
+        'ZupIT/charlescd',
+        'waikato-datamining/adams-applications'
+    ]
+}
+
 # Flip the list
 gh_org_to_project_list_name: Dict[str, str] = {}
 for list_name in project_list_name_to_gh_org:
