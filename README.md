@@ -36,6 +36,19 @@ lgtm:
     api_version:    # From a property named `api_version` inside of any JSON POST request made
 ```
 
+## Commands
+
+```bash
+# Finds all repositories for a specified Github organization and adds them to your LGTM's account's project list. (note: this will only follow repos that contain Kotlin, Java, and Groovy languages).
+python3 follow_org.py GITHUB_ORG_TO_FOLLOW
+
+# Finds all repositories for a specified Github organization and unfollows them from your LGTM account's project list.
+python3 unfollow_org.py GITHUB_ORG_TO_UNFOLLOW
+
+# Finds all repositories for a specified Github Organization and adds them to your specified LGTM account's project list.
+python3 move_org_projects_under_project_list_then_unfollow.py LGTM_PROJECT_LIST_NAME GITHUB_ORG
+```
+
 ## Legal
 
 The author of this script assumes no liability for your use of this project, including,
