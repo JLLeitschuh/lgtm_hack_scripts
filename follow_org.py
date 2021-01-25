@@ -14,13 +14,38 @@ def create_github() -> Github:
         return Github(github['api_key'])
 
 
+def get_languages() -> List[str]:
+    default_languages = [
+        'Kotlin',
+        'Groovy',
+        'Java',
+        'C#',
+        'C',
+        'C++',
+        'Python',
+        'Javascript',
+        'TypeScript',
+        'Go'
+    ]
+
+    # If the user does not provide a value to filter languages, we look for all
+    # projects for all languages
+    if len(sys.argv) >= 3:
+        return sys.argv[2].split(',')
+    else:
+        return default_languages
+
+
 def load_repository_list(org: str) -> List[str]:
+    languages = get_languages()
     github = create_github()
     repos = github.get_organization(org).get_repos(type='public')
 
     repos_to_load: List[str] = []
     for repo in repos:
-        if not repo.archived and not repo.fork and repo.language in ['Kotlin', 'Groovy', 'Java']:
+        if repo.archived or repo.fork
+            continue;
+        if repo.language in languages:
             print("Adding: " + repo.full_name)
             repos_to_load.append(repo.full_name)
 
