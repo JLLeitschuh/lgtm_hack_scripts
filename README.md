@@ -36,6 +36,17 @@ lgtm:
     api_version:    # From a property named `api_version` inside of any JSON POST request made
 ```
 
+## Installation
+
+```bash
+# Clone the repo
+git clone https://github.com/JLLeitschuh/lgtm_hack_scripts.git
+
+# Install the necessary python libraries
+pip3 install PyGithub
+pip3 install pyyaml
+```
+
 ## Commands
 
 ```bash
