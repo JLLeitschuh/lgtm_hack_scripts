@@ -15,7 +15,7 @@ def create_github() -> Github:
 
 
 def get_languages() -> List[str]:
-    default_languages = [
+    default_languages: List[str] = [
         'Kotlin',
         'Groovy',
         'Java',
@@ -28,10 +28,12 @@ def get_languages() -> List[str]:
         'Go'
     ]
 
-    # If the user does not provide a value to filter languages, we look for all
-    # projects for all languages
+    # If the user does not want to follow repos using a specific language(s), we
+    # follow all repos that are CodeQL supported instead.
     if len(sys.argv) >= 3:
-        return sys.argv[2].split(',')
+        languages = sys.argv[2].split(',')
+        formatted_languages = [language.capitalize() for language in languages]
+        return formatted_languages
     else:
         return default_languages
 
@@ -43,8 +45,8 @@ def load_repository_list(org: str) -> List[str]:
 
     repos_to_load: List[str] = []
     for repo in repos:
-        if repo.archived or repo.fork
-            continue;
+        if repo.archived or repo.fork:
+            continue
         if repo.language in languages:
             print("Adding: " + repo.full_name)
             repos_to_load.append(repo.full_name)
