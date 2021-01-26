@@ -39,8 +39,17 @@ lgtm:
 ## Commands
 
 ```bash
-# Finds all repositories for a specified Github organization and adds them to your LGTM's account's project list. (note: this will only follow repos that contain Kotlin, Java, and Groovy languages).
-python3 follow_org.py GITHUB_ORG_TO_FOLLOW
+# Finds all repositories for a specified Github organization and adds them to your LGTM's account's project list.
+#
+# For example, if you want to add repositories that use Java and Kotlin:
+# python3 follow_org.py netflix Java,Kotlin
+#
+# If you want to find all CodeQL-supported repositories regardless of the language used,
+# don't provide a second argument in the command:
+# python3 follow_org.py netflix
+#
+python3 follow_org.py GITHUB_ORG_TO_FOLLOW LANGUAGES_SUPPORTED
+
 
 # Finds all repositories for a specified Github organization and unfollows them from your LGTM account's project list.
 python3 unfollow_org.py GITHUB_ORG_TO_UNFOLLOW
