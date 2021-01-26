@@ -34,6 +34,8 @@ lgtm:
     long_session:   # From the cookie named `lgtm_long_session`
     short_session:  # From the cookie named `lgtm_short_session`
     api_version:    # From a property named `api_version` inside of any JSON POST request made
+github:
+    api_key:        # The Github API token. You can create one here: https://github.com/settings/tokens/new. The token should have no permissions.
 ```
 
 ## Commands
