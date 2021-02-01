@@ -1,4 +1,3 @@
-# This script will look for repos given a search term and language.
 from typing import List
 from github import Github
 from lgtm import LGTMSite
@@ -14,11 +13,6 @@ lgtm_counter = 0
 # TODO: RUN THIS
 
 # python3 follow_repos_by_search_term.py <LANGUAGE> <SEARCH_TERM>
-# Do some basic checks before we run the script
-
-if len(sys.argv) < 3:
-    print("Please make sure you provided a language and search term")
-    exit
 
 def create_github() -> Github:
     with open("config.yml") as config_file:
@@ -52,23 +46,25 @@ def find_and_save_projects_to_lgtm(language: str, search_term: str):
             # https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting
             time.sleep(1)
 
-            global gh_counter
-            gh_counter += 1
-            print("gh_counter at ", gh_counter)
-
             if repo.archived or repo.fork:
                 continue
             repo_name = repo.full_name
+
             print("About to save: " + repo_name)
             repo_url: str = 'https://github.com/' + repo_name
 
-            global lgtm_counter
-            lgtm_counter += 1
-            print("lgtm_counter at ", lgtm_counter)
+            # Another throttle. Considering we are sending a request to Github
+            # owned properties twice in a small time-frame, I would prefer for
+            # this to be here.
             time.sleep(1)
 
             follow_repo_result = site.follow_repository(repo_url)
             print("Saved the project: " + repo_name)
+
+
+if len(sys.argv) < 3:
+    print("Please make sure you provided a language and search term")
+    exit
 
 language = sys.argv[1].capitalize()
 search_term = sys.argv[2]

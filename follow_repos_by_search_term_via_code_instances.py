@@ -5,18 +5,6 @@ import sys
 import yaml
 import time
 
-gh_counter = 0
-lgtm_counter = 0
-
-# This script works similar to the follow_repos_by_search_term.py script but
-# this script will go more in deep, looking for code instances and then
-# selecting repos based on that.
-# python3 follow_code_by_search_term.py <LANGUAGE> <SEARCH_TERM>
-
-# Do some basic checks before we run the script
-if len(sys.argv) < 3:
-    print("Please make sure you provided a language and search term")
-    exit
 
 def create_github() -> Github:
     with open("config.yml") as config_file:
@@ -67,10 +55,12 @@ def find_and_save_projects_to_lgtm(language: str, search_term: str) -> List[str]
     #     follow_repo_result = site.follow_repository(repo_url)
     #     print("Saved the project: " + repo_name)
 
+if len(sys.argv) < 3:
+    print("Please make sure you provided a language and search term")
+    exit
 
 language = sys.argv[1].capitalize()
 search_term = sys.argv[2]
 
 print(f'Following repos for the {language} language using the \'{search_term}\' search term.')
-
 find_and_save_projects_to_lgtm(language, search_term)

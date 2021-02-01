@@ -1,9 +1,3 @@
-# This PR will do several things:
-
-# 1. Get the most starred repositories for a given language from Github
-# 2. Do some conversion work that I don't know what is
-# 3. Build way to follow projects in lgtm.
-
 from typing import List
 
 from github import Github
@@ -13,9 +7,6 @@ from datetime import datetime
 import sys
 import yaml
 import time
-
-
-# python3 follow_top_repos_by_star_count.py <LANGUAGE>
 
 def create_github() -> Github:
     with open("config.yml") as config_file:
@@ -30,7 +21,7 @@ def current_year() -> int:
 def generate_dates() -> List[str]:
     date_ranges: List[str] = []
 
-    # Github started in 2008
+    # Github was formed in 2008
     year_range = list(range(2008, current_year() + 1))
 
     for i, year in enumerate(year_range):
@@ -70,6 +61,6 @@ if len(sys.argv) < 2:
     exit
 
 language = sys.argv[1].capitalize()
-print('Following the top repos for %s' % language)
 
+print('Following the top repos for %s' % language)
 find_and_save_projects_to_lgtm(language)
