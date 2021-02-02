@@ -31,9 +31,20 @@ def generate_dates() -> List[str]:
     year_range = list(range(2008, current_year() + 1))
 
     for i, year in enumerate(year_range):
-        date_ranges.append(f'{year}-01-01..{year + 1}-01-01')
+        date_ranges.append(f'{year}-01-01..{year}-12-31')
 
     return date_ranges
+
+def save_project_to_lgtm(repo_name: str):
+    print("About to save: " + repo_name)
+    # Another throttle. Considering we are sending a request to Github
+    # owned properties twice in a small time-frame, I would prefer for
+    # this to be here.
+    time.sleep(1)
+
+    repo_url: str = 'https://github.com/' + repo_name
+    follow_repo_result = site.follow_repository(repo_url)
+    print("Saved the project: " + repo_name)
 
 def find_and_save_projects_to_lgtm(language: str, search_term: str):
     github = create_github()
@@ -48,19 +59,8 @@ def find_and_save_projects_to_lgtm(language: str, search_term: str):
 
             if repo.archived or repo.fork:
                 continue
-            repo_name = repo.full_name
 
-            print("About to save: " + repo_name)
-            repo_url: str = 'https://github.com/' + repo_name
-
-            # Another throttle. Considering we are sending a request to Github
-            # owned properties twice in a small time-frame, I would prefer for
-            # this to be here.
-            time.sleep(1)
-
-            follow_repo_result = site.follow_repository(repo_url)
-            print("Saved the project: " + repo_name)
-
+            save_project_to_lgtm(repo.full_name)
 
 if len(sys.argv) < 3:
     print("Please make sure you provided a language and search term")
@@ -69,5 +69,5 @@ if len(sys.argv) < 3:
 language = sys.argv[1].capitalize()
 search_term = sys.argv[2]
 
-print(f'Following repos for the {language} language using the \'{search_term}\' search term.')
+print(f'Following repos for the {language} language that contain the \'{search_term}\' search term.')
 find_and_save_projects_to_lgtm(language, search_term)

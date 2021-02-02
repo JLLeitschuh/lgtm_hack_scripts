@@ -36,24 +36,23 @@ def save_project_to_lgtm(repo_name: str):
     follow_repo_result = site.follow_repository(repo_url)
     print("Saved the project: " + repo_name)
 
-def find_and_save_projects_to_lgtm(language: str, search_term: str) -> List[str]:
+def find_and_save_projects_to_lgtm(language: str, search_term: str):
     github = create_github()
     site = LGTMSite.create_from_file()
 
     for date_range in generate_dates():
-        code_found = github.search_code(query=f'language:{language} created:{date_range} {search_term}')
+        code_snippets_found = github.search_code(query=f'language:{language} created:{date_range} {search_term}')
+        for code_snippet in code_snippets_found:
+            repo = code_snippet.repository
 
-        # at this point we can get the repo full name by running the following code below:
-        repo = code_found[0].repository
+            # Github has rate limiting in place hence why we add a sleep here. More info can be found here:
+            # https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting
+            time.sleep(1)
 
-        # Github has rate limiting in place hence why we add a sleep here. More info can be found here:
-        # https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting
-        time.sleep(1)
+            if repo.archived or repo.fork:
+                continue
 
-        if repo.archived or repo.fork:
-            continue
-
-        save_project_to_lgtm(repo.full_name)
+            save_project_to_lgtm(repo.full_name)
 
 if len(sys.argv) < 3:
     print("Please make sure you provided a language and search term")
@@ -62,5 +61,5 @@ if len(sys.argv) < 3:
 language = sys.argv[1].capitalize()
 search_term = sys.argv[2]
 
-print(f'Following repos for the {language} language using the \'{search_term}\' search term.')
+print(f'Following repos for the {language} language that contain the \'{search_term}\' search term.')
 find_and_save_projects_to_lgtm(language, search_term)

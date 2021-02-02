@@ -25,7 +25,7 @@ def generate_dates() -> List[str]:
     year_range = list(range(2008, current_year() + 1))
 
     for i, year in enumerate(year_range):
-        date_ranges.append(f'{year}-01-01..{year + 1}-01-01')
+        date_ranges.append(f'{year}-01-01..{year}-12-31')
 
     return date_ranges
 
