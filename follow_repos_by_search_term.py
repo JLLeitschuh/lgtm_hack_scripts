@@ -35,7 +35,7 @@ def generate_dates() -> List[str]:
 
     return date_ranges
 
-def save_project_to_lgtm(repo_name: str):
+def save_project_to_lgtm(site: 'LGTMSite', repo_name: str):
     print("About to save: " + repo_name)
     # Another throttle. Considering we are sending a request to Github
     # owned properties twice in a small time-frame, I would prefer for
@@ -52,6 +52,7 @@ def find_and_save_projects_to_lgtm(language: str, search_term: str):
 
     for date_range in generate_dates():
         repos = github.search_repositories(query=f'language:{language} created:{date_range} {search_term}')
+
         for repo in repos:
             # Github has rate limiting in place hence why we add a sleep here. More info can be found here:
             # https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting
@@ -60,7 +61,7 @@ def find_and_save_projects_to_lgtm(language: str, search_term: str):
             if repo.archived or repo.fork:
                 continue
 
-            save_project_to_lgtm(repo.full_name)
+            save_project_to_lgtm(site, repo.full_name)
 
 if len(sys.argv) < 3:
     print("Please make sure you provided a language and search term")
