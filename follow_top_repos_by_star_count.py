@@ -29,6 +29,17 @@ def generate_dates() -> List[str]:
 
     return date_ranges
 
+def save_project_to_lgtm(site: 'LGTMSite', repo_name: str):
+    print("Adding: " + repo_name)
+    # Another throttle. Considering we are sending a request to Github
+    # owned properties twice in a small time-frame, I would prefer for
+    # this to be here.
+    time.sleep(1)
+
+    repo_url: str = 'https://github.com/' + repo_name
+    site.follow_repository(repo_url)
+    print("Saved the project: " + repo_name)
+
 def find_and_save_projects_to_lgtm(language: str):
     github = create_github()
     site = LGTMSite.create_from_file()
@@ -44,17 +55,7 @@ def find_and_save_projects_to_lgtm(language: str):
             if repo.archived or repo.fork:
                 continue
 
-            repo_name = repo.full_name
-
-            print("Adding: " + repo_name)
-
-            repo_url: str = 'https://github.com/' + repo_name
-            print(repo_url)
-
-            time.sleep(1)
-
-            site.follow_repository(repo_url)
-
+            save_project_to_lgtm(site, repo.full_name)
 
 if len(sys.argv) < 2:
     print("Please provide a language you want to search")
