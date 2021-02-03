@@ -7,13 +7,6 @@ import sys
 import yaml
 import time
 
-gh_counter = 0
-lgtm_counter = 0
-
-# TODO: RUN THIS
-
-# python3 follow_repos_by_search_term.py <LANGUAGE> <SEARCH_TERM>
-
 def create_github() -> Github:
     with open("config.yml") as config_file:
         config = yaml.safe_load(config_file)
