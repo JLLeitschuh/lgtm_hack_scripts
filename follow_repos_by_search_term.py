@@ -36,7 +36,7 @@ def save_project_to_lgtm(site: 'LGTMSite', repo_name: str):
     time.sleep(1)
 
     repo_url: str = 'https://github.com/' + repo_name
-    follow_repo_result = site.follow_repository(repo_url)
+    site.follow_repository(repo_url)
     print("Saved the project: " + repo_name)
 
 def find_and_save_projects_to_lgtm(language: str, search_term: str):
