@@ -1,8 +1,8 @@
 from typing import List
 from lgtm import LGTMSite
 
-import github_dates
-import github_api
+import utils.github_dates
+import utils.github_api
 import sys
 import yaml
 import time

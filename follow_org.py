@@ -1,7 +1,7 @@
 from typing import List
 from lgtm import LGTMSite
 
-import github_api
+import utils.github_api
 import sys
 import yaml
 
