@@ -32,7 +32,7 @@ def get_languages() -> List[str]:
 
 def load_repository_list(org: str) -> List[str]:
     languages = get_languages()
-    github = github_api.create()
+    github = utils.github_api.create()
     repos = github.get_organization(org).get_repos(type='public')
 
     repos_to_load: List[str] = []

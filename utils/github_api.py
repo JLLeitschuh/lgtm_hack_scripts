@@ -1,3 +1,4 @@
+from github import Github
 import yaml
 
 def create() -> Github:

@@ -19,10 +19,10 @@ def save_project_to_lgtm(site: 'LGTMSite', repo_name: str):
     print("Saved the project: " + repo_name)
 
 def find_and_save_projects_to_lgtm(language: str):
-    github = github_api.create()
+    github = utils.github_api.create()
     site = LGTMSite.create_from_file()
 
-    for date_range in github_dates.generate_dates():
+    for date_range in utils.github_dates.generate_dates():
         repos = github.search_repositories(query=f'stars:>500 created:{date_range} sort:stars language:{language}')
 
         for repo in repos:
