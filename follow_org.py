@@ -1,17 +1,8 @@
 from typing import List
-
-from github import Github
-
 from lgtm import LGTMSite
+
+import utils.github_api
 import sys
-import yaml
-
-
-def create_github() -> Github:
-    with open("config.yml") as config_file:
-        config = yaml.safe_load(config_file)
-        github: dict = config['github']
-        return Github(github['api_key'])
 
 
 def get_languages() -> List[str]:
@@ -40,7 +31,7 @@ def get_languages() -> List[str]:
 
 def load_repository_list(org: str) -> List[str]:
     languages = get_languages()
-    github = create_github()
+    github = utils.github_api.create()
     repos = github.get_organization(org).get_repos(type='public')
 
     repos_to_load: List[str] = []
