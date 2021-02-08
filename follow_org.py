@@ -3,7 +3,6 @@ from lgtm import LGTMSite
 
 import utils.github_api
 import sys
-import yaml
 
 
 def get_languages() -> List[str]:
