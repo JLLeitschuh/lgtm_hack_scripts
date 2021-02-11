@@ -22,7 +22,7 @@ def find_and_save_projects_to_lgtm(language: str, search_term: str):
     site = LGTMSite.create_from_file()
 
     for date_range in utils.github_dates.generate_dates():
-        repos = github.search_repositories(query=f'language:{language} created:{date_range} {search_term}')
+        repos = github.search_repositories(query=f'language:{language} fork:false created:{date_range} {search_term}')
 
         for repo in repos:
             # Github has rate limiting in place hence why we add a sleep here. More info can be found here:
