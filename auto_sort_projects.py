@@ -8,6 +8,10 @@ project_list_name_to_gh_org = {
         'GoogleCloudPlatform',
         'GoogleContainerTools',
         'googleapis',
+        'googlecolab',
+        'googlemaps',
+        'google-cloudsearch',
+        'flutter'
     ],
     'Apache_Projects': ['apache'],
     'AirBnB_Projects': ['airbnb'],
