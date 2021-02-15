@@ -31,6 +31,7 @@ project_list_name_to_gh_org = {
     'Eclipse_Projects': [
         'eclipse',
         'eclipse-ee4j',
+        'eclipse-theia',
     ],
     'Microsoft_Projects': ['microsoft'],
     'PayPal_Projects': ['paypal'],
