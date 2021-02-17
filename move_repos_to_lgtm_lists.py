@@ -35,4 +35,5 @@ for cached_file_name in cached_files:
         # we just added to our project list.
         site.unfollow_repository_by_id(project_id)
 
+    # Since we are done with the file, we can now delete it from the cache.
     os.remove(cached_file)
