@@ -45,13 +45,14 @@ def save_project_to_lgtm(site: 'LGTMSite', repo_name: str) -> dict:
     print("Saved the project: " + repo_name)
     return project
 
-def find_and_save_projects_to_lgtm(language: str, custom_list_name: str) -> List[str]:
+def find_and_save_projects_to_lgtm(language: str) -> List[str]:
     github = utils.github_api.create()
     site = LGTMSite.create_from_file()
     saved_project_ids: List[str] = []
 
     for date_range in utils.github_dates.generate_dates():
-        repos = github.search_repositories(query=f'stars:>500 created:{date_range} fork:false sort:stars language:{language}')
+        # this was originally 500 stars. changing this so that it's easy for testing
+        repos = github.search_repositories(query=f'stars:>100500 created:{date_range} fork:false sort:stars language:{language}')
 
         for repo in repos:
             # Github has rate limiting in place hence why we add a sleep here. More info can be found here:
@@ -63,7 +64,7 @@ def find_and_save_projects_to_lgtm(language: str, custom_list_name: str) -> List
 
             saved_project = save_project_to_lgtm(site, repo.full_name)
             saved_project_id = saved_project['realProject'][0]['key']
-            saved_project_ids.append(saved_project)
+            saved_project_ids.append(saved_project_id)
 
     return saved_project_ids
 
@@ -75,8 +76,10 @@ language = sys.argv[1].capitalize()
 
 print('Following the top repos for %s' % language)
 saved_project_ids = find_and_save_projects_to_lgtm(language)
-
+print("saved proejct ids")
+print(saved_project_ids)
 # If the user provided a second arg then they want to create a custom list.
-if len(sys.argv) < 3:
+if len(sys.argv) <= 3:
+    # print
     custom_list_name = sys.argv[2]
     utils.cacher.write_project_ids_to_file(saved_project_ids, custom_list_name)

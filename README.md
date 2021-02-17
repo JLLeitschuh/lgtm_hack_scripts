@@ -90,13 +90,15 @@ commands. This CUSTOM_LIST_NAME represents the name of a LGTM project list that 
 
 1. Run a command passing in the name of the custom list name. The command below will follow Javascript repos and generate a cache file of every repo you follow for the project list called "cool_javascript_projects".
 
-    `python3 follow_top_repos_by_star_count.py javascript cool_javascript_projects`
+    `python3 follow_top_repos_by_star_count.py javascript big_ole_js_projects`
 
 2. Wait 1 - 24 hours.
 
 3. Run the command below. This will take a cached file you created earlier, create a LGTM custom project list, add the projects to that project list, and finally unfollow the repositories in your LGTM account.
 
     `python3 move_repos_to_lgtm_lists.py`
+
+Note: When naming a project custom list name, please use alphanumeric, dashes, and underscore characters only.
 
 ## Legal
 

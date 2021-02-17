@@ -2,7 +2,7 @@ from typing import List
 import sys
 import os
 
-print(os.listdir("cache"))
+print(len(sys.argv))
 
 
 #
