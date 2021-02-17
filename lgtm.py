@@ -35,6 +35,7 @@ class LGTMSite:
         )
         return r.json()
 
+    # Retrieves a user's projects
     def get_my_projects(self) -> List[dict]:
         url = 'https://lgtm.com/internal_api/v0.2/getMyProjects?apiVersion=' + self.api_version
         data = self._make_lgtm_get(url)
@@ -43,10 +44,12 @@ class LGTMSite:
         else:
             raise LGTMRequestException('LGTM GET request failed with response: %s' % str(data))
 
+    # Given an org name, retrieve a user's projects under that org
     def get_my_projects_under_org(self, org: str) -> List['SimpleProject']:
         projects_sorted = LGTMDataFilters.org_to_ids(self.get_my_projects())
         return LGTMDataFilters.extract_project_under_org(org, projects_sorted)
 
+    # This method handles making a POST request to the LGTM server
     def _make_lgtm_post(self, url: str, data: dict) -> dict:
         api_data = {
             'apiVersion': self.api_version
@@ -74,6 +77,7 @@ class LGTMSite:
         else:
             raise LGTMRequestException('LGTM POST request failed with response: %s' % str(data_returned))
 
+    # Given a project list id and a list of project ids, add the projects to the project list.
     def load_into_project_list(self, into_project: int, lgtm_project_ids: List[str]):
         url = "https://lgtm.com/internal_api/v0.2/updateProjectSelection"
         # Because LGTM uses some wacky format for it's application/x-www-form-urlencoded data
@@ -112,6 +116,7 @@ class LGTMSite:
         }
         self._make_lgtm_post(url, data)
 
+    # Given a project id, unfollow the project
     def unfollow_repository_by_id(self, project_id: str):
         url = "https://lgtm.com/internal_api/v0.2/unfollowProject"
         data = {
