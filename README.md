@@ -63,7 +63,7 @@ python3 move_org_projects_under_project_list_then_unfollow.py <LGTM_PROJECT_LIST
 python3 follow_repos_by_search_term_via_code_instances.py <LANGUAGE> <SEARCH_TERM>
 
 # Finds repositories given a search term. Under the hood, the script searches Github for repositories that match the provided search term.
-python3 follow_repos_by_search_term.py <LANGUAGE> <SEARCH_TERM>
+python3 follow_repos_by_search_term.py <LANGUAGE> <SEARCH_TERM> <CUSTOM_LIST_NAME>(optional)
 
 # Finds top repositories that have a minimum 500 stars and use the provided programming language.
 python3 follow_top_repos_by_star_count.py <LANGUAGE> <CUSTOM_LIST_NAME>(optional)
