@@ -28,7 +28,7 @@ from lgtm import LGTMSite
 
 import utils.github_dates
 import utils.github_api
-import utils.cacher 
+import utils.cacher
 import sys
 import time
 
@@ -75,8 +75,7 @@ language = sys.argv[1].capitalize()
 
 print('Following the top repos for %s' % language)
 saved_project_ids = find_and_save_projects_to_lgtm(language)
-print("saved proejct ids")
-print(saved_project_ids)
+
 # If the user provided a second arg then they want to create a custom list.
 if len(sys.argv) <= 3:
     # print
