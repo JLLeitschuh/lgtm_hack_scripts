@@ -73,8 +73,7 @@ python3 follow_top_repos_by_star_count.py <LANGUAGE> <CUSTOM_LIST_NAME>(optional
 In developing these collection of scripts, we realized that when a user follows thousands of repos in their LGTM account, there is a chance that the LGTM account will break. You won't be able to use the query console and some API
 calls will be broken.
 
-To resolve this, we decided to create a feature users can opt-in. This feature called "Custom Projects Lists" does the
-following:
+To resolve this, we decided to create a feature users can opt-in. The "Custom Projects Lists" feature does the following:
 
 - Follows all repos (aka project) in your LGTM account.
 - Stores every project you follow in a txt file.
