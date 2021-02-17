@@ -1,8 +1,6 @@
 from typing import List
 from lgtm import LGTMSite
 
-import sys
-import time
 import os
 
 def get_project_list_id(cached_file_name: str) -> str:
