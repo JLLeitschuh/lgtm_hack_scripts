@@ -24,9 +24,10 @@ def find_and_save_projects_to_lgtm(language: str, search_term: str) -> List[str]
     github = utils.github_api.create()
     site = LGTMSite.create_from_file()
     saved_project_ids: List[str] = []
+
     for date_range in utils.github_dates.generate_dates():
         repos = github.search_repositories(query=f'language:{language} fork:false created:{date_range} {search_term}')
-        print(f'language:{language} fork:false created:{date_range} {search_term}')
+
         for repo in repos:
             # Github has rate limiting in place hence why we add a sleep here. More info can be found here:
             # https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting
@@ -36,15 +37,11 @@ def find_and_save_projects_to_lgtm(language: str, search_term: str) -> List[str]
                 continue
 
             saved_project = save_project_to_lgtm(site, repo.full_name)
-            print('--------------------')
-            print('--------------------')
-            print('--------------------')
-            print(saved_project)
-            print('--------------------')
-            print('--------------------')
-            print('--------------------')
-            saved_project_id = saved_project['realProject'][0]['key']
-            saved_project_ids.append(saved_project_id)
+
+            # Proto projects can't be saved to a project list, so instead we only grab real projects.
+            if "realProject" in saved_project:
+                saved_project_id = saved_project['realProject'][0]['key']
+                saved_project_ids.append(saved_project_id)
 
     return saved_project_ids
 
