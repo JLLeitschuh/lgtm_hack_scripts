@@ -108,13 +108,13 @@ class LGTMSite:
         except LGTMRequestException:
             print('Failed rebuilding project. This may be because it is already being built. `%s`' % simple_project)
 
-    def follow_repository(self, repository_url: str):
+    def follow_repository(self, repository_url: str) -> dict:
         url = "https://lgtm.com/internal_api/v0.2/followProject"
         data = {
             'url': repository_url,
             'apiVersion': self.api_version
         }
-        self._make_lgtm_post(url, data)
+        return self._make_lgtm_post(url, data)
 
     # Given a project id, unfollow the project
     def unfollow_repository_by_id(self, project_id: str):

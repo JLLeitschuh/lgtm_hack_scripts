@@ -10,16 +10,16 @@ from lgtm import LGTMSite
 import sys
 import time
 
-lgtm_site = LGTMSite.create_from_file()
+site = LGTMSite.create_from_file()
 
 file_name = "test.txt"
 project_list_name = file_name.split(".")[0]
 
 # We want to find or create a project list based on the the name of
 # the text file that holds all of the projects we are currently following.
-project_list_id = lgtm_site.get_or_create_project_list(project_list_name)
+project_list_data = site.get_or_create_project_list(project_list_name)
+project_list_id = project_list_data['realProject'][0]['key']
 file = open(file_name, "r")
-
 
 project_ids = file.read()
 # With the project list id and the project ids, we now want to save the repos
