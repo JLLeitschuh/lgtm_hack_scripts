@@ -63,9 +63,12 @@ def find_and_save_projects_to_lgtm(language: str) -> List[str]:
 
             saved_project = save_project_to_lgtm(site, repo.full_name)
 
-            # Proto projects can't be saved to a project list, so instead we only grab real projects.
             if "realProject" in saved_project:
-                saved_project_id = saved_project['realProject'][0]['key']
+                saved_project_id = saved_project['realProject'][0]['displayName']
+                saved_project_ids.append(saved_project_id)
+
+            if "protoproject" in saved_project:
+                saved_project_id = saved_project['protoproject']['displayName']
                 saved_project_ids.append(saved_project_id)
 
     return saved_project_ids
