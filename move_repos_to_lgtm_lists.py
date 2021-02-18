@@ -44,6 +44,21 @@ def process_cached_file(cached_file_name):
     cleanup(cached_file)
 
 site = LGTMSite.create_from_file()
+
+projects = site.get_my_projects()
+
+# build_still_in_progess = False
+#
+# for project in projects:
+#     if project.get('protoproject') is not None and project.get('protoproject')['displayName']:
+#         if project['protoproject']['state'] == "build_attempt_in_progress":
+#             build_still_in_progess = True
+#             break
+#
+# if build_still_in_progess:
+#     print("There are projects still being processed by LGTM. It's not safe ")
+#     return
+
 cached_file_names = os.listdir("cache")
 
 for cached_file_name in cached_file_names:
