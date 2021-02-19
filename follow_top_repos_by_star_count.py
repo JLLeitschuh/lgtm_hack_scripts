@@ -48,7 +48,7 @@ def save_project_to_lgtm(site: 'LGTMSite', repo_name: str) -> dict:
 def find_and_save_projects_to_lgtm(language: str) -> List[str]:
     github = utils.github_api.create()
     site = LGTMSite.create_from_file()
-    saved_project_ids: List[str] = []
+    saved_project_data: List[str] = []
 
     for date_range in utils.github_dates.generate_dates():
         repos = github.search_repositories(query=f'stars:>500 created:{date_range} fork:false sort:stars language:{language}')
@@ -63,15 +63,18 @@ def find_and_save_projects_to_lgtm(language: str) -> List[str]:
 
             saved_project = save_project_to_lgtm(site, repo.full_name)
 
+            # TODO: This process is duplicated elsewhere and should be under one location
             if "realProject" in saved_project:
-                saved_project_id = saved_project['realProject'][0]['displayName']
-                saved_project_ids.append(saved_project_id)
+                saved_project_name = saved_project['realProject'][0]['displayName']
+                saved_project_id = saved_project['realProject'][0]['key']
+                saved_project_data.append(f'{saved_project_name},{saved_project_id},realProject')
 
             if "protoproject" in saved_project:
-                saved_project_id = saved_project['protoproject']['displayName']
-                saved_project_ids.append(saved_project_id)
+                saved_project_name = saved_project['protoproject']['displayName']
+                saved_project_id = saved_project['protoproject']['key']
+                saved_project_data.append(f'{saved_project_name},{saved_project_id},protoproject')
 
-    return saved_project_ids
+    return saved_project_data
 
 if len(sys.argv) < 2:
     print("Please provide a language you want to search")
@@ -80,10 +83,10 @@ if len(sys.argv) < 2:
 language = sys.argv[1].capitalize()
 
 print('Following the top repos for %s' % language)
-saved_project_ids = find_and_save_projects_to_lgtm(language)
+saved_project_data = find_and_save_projects_to_lgtm(language)
 
 # If the user provided a second arg then they want to create a custom list.
 if len(sys.argv) <= 3:
     # print
     custom_list_name = sys.argv[2]
-    utils.cacher.write_project_ids_to_file(saved_project_ids, custom_list_name)
+    utils.cacher.write_project_data_to_file(saved_project_data, custom_list_name)
