@@ -55,7 +55,7 @@ class LGTMSite:
             'apiVersion': self.api_version
         }
         full_data = {**api_data, **data}
-        print(data)
+        # print(data)
         r = requests.post(
             url,
             full_data,
@@ -68,7 +68,7 @@ class LGTMSite:
             response_text = r.text
             raise LGTMRequestException(f'Failed to parse JSON. Response was: {response_text}') from e
 
-        print(data_returned)
+        # print(data_returned)
         if data_returned['status'] == 'success':
             if 'data' in data_returned:
                 return data_returned['data']
@@ -121,6 +121,14 @@ class LGTMSite:
         url = "https://lgtm.com/internal_api/v0.2/unfollowProject"
         data = {
             'project_key': project_id,
+        }
+        self._make_lgtm_post(url, data)
+
+    # Given a project id, unfollow the protoproject
+    def unfollow_proto_repository_by_id(self, project_id: str):
+        url = "https://lgtm.com/internal_api/v0.2/unfollowProtoproject"
+        data = {
+            'protoproject_key': project_id,
         }
         self._make_lgtm_post(url, data)
 
