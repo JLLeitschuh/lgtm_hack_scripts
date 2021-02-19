@@ -1,65 +1,39 @@
 from typing import List
 from lgtm import LGTMSite
 
+import utils.cacher
 import os
+import time
 
-def get_project_list_id(cached_file_name: str) -> str:
+def get_project_list_id(cached_file_name: str, site: 'LGTMSite') -> str:
     project_list_name = cached_file_name.split(".")[0]
 
-    # We want to find or create a project list based on the the name of
-    # the text file that holds all of the projects we are currently following.
     return site.get_or_create_project_list(project_list_name)
 
-def get_project_ids(cached_file: str) -> List[str]:
-    file = open(cached_file, "r")
-
-    project_ids = file.read().split("\n")
-
-    # remove any "" in the array
-    while("" in project_ids):
-        project_ids.remove("")
-
-    return project_ids
-
-def cleanup(file_name: str):
-    # Since we are done with the file, we can now delete it from the cache.
-    os.remove(file_name)
-
-def unfollow_projects(project_ids: List[str]):
-    for project_id in project_ids:
-        # The last thing we need to do is tidy up and unfollow all the repositories
-        # we just added to our project list.
-        site.unfollow_repository_by_id(project_id)
-
-def process_cached_file(cached_file_name):
+def process_cached_file(cached_file_name: str, site: 'LGTMSite'):
     cached_file = "cache/" + cached_file_name
-    project_list_id = get_project_list_id(cached_file_name)
-    project_ids = get_project_ids(cached_file)
+    project_builds = utils.cacher.get_project_builds(cached_file)
+    followed_projects = site.get_my_projects()
 
-    # With the project list id and the project ids, we now want to save the repos
-    # we currently follow to the project list
-    site.load_into_project_list(project_list_id, project_ids)
+    if project_builds.build_processes_in_progress(followed_projects):
+        print(f'The {cached_file_name} can\'t be processed at this time because a project build is still in progress.')
+        return
 
-    unfollow_projects(project_ids)
-    cleanup(cached_file)
+    project_list_id = get_project_list_id(cached_file_name, site)
+    print("Moving followed projects to the project list")
+
+    # site.load_into_project_list(project_list_id, project_builds.return_successful_project_builds(site))
+ 
+    # If a project fails to be processed by LGTM, we still unfollow the project.
+    print("Unfollowing projects")
+    project_builds.unfollow_projects(site)
+    print("Removing the cache file.")
+    utils.cacher.remove_file(cached_file)
+    print("Done processing cache file.")
 
 site = LGTMSite.create_from_file()
 
-projects = site.get_my_projects()
+for cached_file_name in os.listdir("cache"):
+    process_cached_file(cached_file_name, site)
 
-# build_still_in_progess = False
-#
-# for project in projects:
-#     if project.get('protoproject') is not None and project.get('protoproject')['displayName']:
-#         if project['protoproject']['state'] == "build_attempt_in_progress":
-#             build_still_in_progess = True
-#             break
-#
-# if build_still_in_progess:
-#     print("There are projects still being processed by LGTM. It's not safe ")
-#     return
-
-cached_file_names = os.listdir("cache")
-
-for cached_file_name in cached_file_names:
-    process_cached_file(cached_file_name)
+print("Finished!")
