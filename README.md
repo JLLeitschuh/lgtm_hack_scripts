@@ -99,6 +99,13 @@ commands. This CUSTOM_LIST_NAME represents the name of a LGTM project list that 
 
 Note: When naming a project custom list name, please use alphanumeric, dashes, and underscore characters only.
 
+### Build Processes By LGTM
+LGTM can't move projects that are being processed into custom lists. To resolve this, we've added a check that confirms whether or not all projects you plan on moving to a custom list are processed. If a project isn't processed, we will not move any projects into the custom list and you'll receive the following error:
+
+> The <CACHED_FILE_NAME> can't be processed at this time because a project build is still in progress.
+
+If you receive this error, wait a few hours and run the script again. 
+
 ## Legal
 
 The author of this script assumes no liability for your use of this project, including,
