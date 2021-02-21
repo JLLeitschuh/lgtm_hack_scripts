@@ -35,8 +35,14 @@ class LGTMSite:
         )
         return r.json()
 
-    # Retrieves a user's projects
     def get_my_projects(self) -> List[dict]:
+        '''
+        Returns a user's projects.
+
+                Returns:
+                        data (List[dict]): Response data from LGTM
+        '''
+
         url = 'https://lgtm.com/internal_api/v0.2/getMyProjects?apiVersion=' + self.api_version
         data = self._make_lgtm_get(url)
         if data['status'] == 'success':
@@ -44,13 +50,32 @@ class LGTMSite:
         else:
             raise LGTMRequestException('LGTM GET request failed with response: %s' % str(data))
 
-    # Given an org name, retrieve a user's projects under that org
     def get_my_projects_under_org(self, org: str) -> List['SimpleProject']:
+        '''
+        Given an org name, returns a user's projects that are part of an org.
+
+                Parameters:
+                        org (str): An organization
+
+                Returns:
+                        projects (['SimpleProject']): List of SimpleProject's from LGTM part of an org.
+        '''
+
         projects_sorted = LGTMDataFilters.org_to_ids(self.get_my_projects())
         return LGTMDataFilters.extract_project_under_org(org, projects_sorted)
 
-    # This method handles making a POST request to the LGTM server
     def _make_lgtm_post(self, url: str, data: dict) -> dict:
+        '''
+        Makes a HTTP post request to LGTM.com
+
+                Parameters:
+                        url (str): A URL representing where the HTTP request goes
+                        data (dict): Data that will be sent to LGTM.com in the request..
+
+                Returns:
+                        data (dict): Data returned from LGTM.com response.
+        '''
+
         api_data = {
             'apiVersion': self.api_version
         }
@@ -77,8 +102,15 @@ class LGTMSite:
         else:
             raise LGTMRequestException('LGTM POST request failed with response: %s' % str(data_returned))
 
-    # Given a project list id and a list of project ids, add the projects to the project list.
     def load_into_project_list(self, into_project: int, lgtm_project_ids: List[str]):
+        '''
+        Given a project list id and a list of project ids, add the projects to the project list on LGTM.com.
+
+                Parameters:
+                        into_project (int): Project list id
+                        lgtm_project_ids (List[str]): List of project ids
+        '''
+
         url = "https://lgtm.com/internal_api/v0.2/updateProjectSelection"
         # Because LGTM uses some wacky format for it's application/x-www-form-urlencoded data
         list_serialized = ', '.join([('"' + str(elem) + '"') for elem in lgtm_project_ids])
@@ -116,16 +148,28 @@ class LGTMSite:
         }
         return self._make_lgtm_post(url, data)
 
-    # Given a project id, unfollow the project
     def unfollow_repository_by_id(self, project_id: str):
+        '''
+        Given a project id, unfollows a repository.
+
+                Parameters:
+                        project_id (str): A project id
+        '''
+
         url = "https://lgtm.com/internal_api/v0.2/unfollowProject"
         data = {
             'project_key': project_id,
         }
         self._make_lgtm_post(url, data)
 
-    # Given a project id, unfollow the protoproject
     def unfollow_proto_repository_by_id(self, project_id: str):
+        '''
+        Given a project id, unfollows the proto repository.
+
+                Parameters:
+                        project_id (str): A project id
+        '''
+
         url = "https://lgtm.com/internal_api/v0.2/unfollowProtoproject"
         data = {
             'protoproject_key': project_id,
