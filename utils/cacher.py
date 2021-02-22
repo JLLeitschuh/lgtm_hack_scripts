@@ -1,6 +1,7 @@
 from typing import List
 import os
 import time
+from lgtm import LGTMSite
 
 class ProjectBuild:
     def __init__(self, project: dict):
@@ -16,6 +17,16 @@ class ProjectBuild:
         return self.type == "protoproject"
 
     def build_successful(self, followed_projects: List[dict]) -> bool:
+        if self.protoproject:
+            # A throttle that although may not be necessary a nice plus.
+            time.sleep(1)
+            site = LGTMSite.create_from_file()
+            data = site.retrieve_project(self.name)
+
+            # A failed protoproject build will always be intrepreted to LGTM as a project that can't be found.
+            if 'code' in data and data['code'] == 404:
+                return False
+
         # I don't know the name of the build successful status.
         return (
             not self.build_in_progress(followed_projects) and
@@ -47,7 +58,10 @@ class ProjectBuild:
     def project_part_of_cache(self, followed_projects: List[dict]) -> bool:
         part_of_cache = False
         for project in followed_projects:
-            if project.get('protoproject') is not None and project.get('protoproject')['displayName'] == self.name:
+            if (
+                project.get('protoproject') is not None and project.get('protoproject')['displayName'] == self.name or
+                project.get('realProject') is not None and project.get('realProject')[0]['displayName'] == self.name
+                ):
                 part_of_cache = True
                 break
 
@@ -63,6 +77,12 @@ class ProjectBuilds:
             if project.realProject():
                 site.unfollow_repository_by_id(project.id)
             else:
+                data = site.retrieve_project(project.name)
+
+                # A failed protoproject build will always be intrepreted to LGTM as a project that can't be found.
+                if 'code' in data and data['code'] == 404:
+                    return
+
                 site.unfollow_proto_repository_by_id(project.id)
 
     def return_successful_project_builds(self, site: 'LGTMSite') -> List[str]:
