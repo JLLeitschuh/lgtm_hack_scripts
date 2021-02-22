@@ -11,7 +11,6 @@
 # lgtm followed projects into their own lists. this script will take the text file name
 # and use that to create a list. it will then move the lgtm projects into that list and
 # unfollow them from the lgtm list. this script can be used universally.
-#
 # - explicit changes:
 #     - current scripts:
 #         - each script must now accept a list arg that represents the list name that you want

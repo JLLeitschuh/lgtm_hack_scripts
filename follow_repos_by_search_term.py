@@ -40,6 +40,8 @@ def find_and_save_projects_to_lgtm(language: str, search_term: str) -> List[str]
             saved_project = save_project_to_lgtm(site, repo.full_name)
 
             # TODO: This process is duplicated elsewhere and should be under one location
+            # We only save realProjects to the cache since those are the only
+            # ones we can actually process.
             if "realProject" in saved_project:
                 saved_project_name = saved_project['realProject'][0]['displayName']
                 saved_project_id = saved_project['realProject'][0]['key']
