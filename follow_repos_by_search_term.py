@@ -66,6 +66,5 @@ saved_project_data = find_and_save_projects_to_lgtm(language, search_term)
 
 # If the user provided a second arg then they want to create a custom list.
 if len(sys.argv) <= 4:
-    # print
     custom_list_name = sys.argv[3]
     utils.cacher.write_project_data_to_file(saved_project_data, custom_list_name)
