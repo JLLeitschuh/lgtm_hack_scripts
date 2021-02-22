@@ -19,7 +19,7 @@ class ProjectBuild:
     def build_successful(self, followed_projects: List[dict]) -> bool:
         if self.protoproject:
             # A throttle that although may not be necessary a nice plus.
-            time.sleep(1)
+            time.sleep(2)
             site = LGTMSite.create_from_file()
             data = site.retrieve_project(self.name)
 
