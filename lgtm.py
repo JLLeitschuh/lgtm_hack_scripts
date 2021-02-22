@@ -81,7 +81,6 @@ class LGTMSite:
             'apiVersion': self.api_version
         }
         full_data = {**api_data, **data}
-        # print(data)
 
         session = requests.Session()
 
@@ -104,7 +103,6 @@ class LGTMSite:
             response_text = r.text
             raise LGTMRequestException(f'Failed to parse JSON. Response was: {response_text}') from e
 
-        # print(data_returned)
         if data_returned['status'] == 'success':
             if 'data' in data_returned:
                 return data_returned['data']
