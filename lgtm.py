@@ -3,7 +3,8 @@ from typing import Optional, List, Dict
 
 import requests
 import yaml
-
+from urllib3.util.retry import Retry
+from requests.adapters import HTTPAdapter
 
 class LGTMRequestException(Exception):
     pass
@@ -81,12 +82,22 @@ class LGTMSite:
         }
         full_data = {**api_data, **data}
         # print(data)
-        r = requests.post(
+
+        session = requests.Session()
+
+        retries = Retry(total=3,
+            backoff_factor=0.1,
+            status_forcelist=[ 500, 502, 503, 504 ])
+
+        session.mount('https://', HTTPAdapter(max_retries=retries))
+
+        r = session.post(
             url,
             full_data,
             cookies=self._cookies(),
             headers=self._headers()
         )
+
         try:
             data_returned = r.json()
         except ValueError as e:
