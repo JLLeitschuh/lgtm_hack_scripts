@@ -3,7 +3,6 @@ from lgtm import LGTMSite
 
 import utils.cacher
 import os
-import time
 
 def get_project_list_id(cached_file_name: str, site: 'LGTMSite') -> str:
     project_list_name = cached_file_name.split(".")[0]
@@ -20,10 +19,10 @@ def process_cached_file(cached_file_name: str, site: 'LGTMSite'):
         return
 
     project_list_id = get_project_list_id(cached_file_name, site)
-    print("Moving followed projects to the project list")
 
-    # site.load_into_project_list(project_list_id, project_builds.return_successful_project_builds(site))
- 
+    print("Moving followed projects to the project list")
+    site.load_into_project_list(project_list_id, project_builds.return_successful_project_builds(site))
+
     # If a project fails to be processed by LGTM, we still unfollow the project.
     print("Unfollowing projects")
     project_builds.unfollow_projects(site)
