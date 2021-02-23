@@ -27,7 +27,6 @@ class ProjectBuild:
             if 'code' in data and data['code'] == 404:
                 return False
 
-        # I don't know the name of the build successful status.
         return (
             not self.build_in_progress(followed_projects) and
             not self.build_failed(followed_projects)
@@ -49,8 +48,17 @@ class ProjectBuild:
         in_state = False
 
         for project in followed_projects:
-            if project.get('protoproject') is not None and project.get('protoproject')['state'] == state:
+            if project.get('protoproject') is not None and project.get('protoproject')['displayName'] == self.name and project.get('protoproject')['state'] == state:
                 in_state = True
+                break
+
+            # Real projects always have successful builds, or at least as far as I can tell.
+            if project.get('realProject') is not None and project.get('realProject')[0]['displayName'] == self.name:
+                if state == "build_attempt_in_progress" or state == "build_attempt_failed":
+                    in_state == False
+                else:
+                    in_state = True
+
                 break
 
         return in_state
@@ -74,6 +82,7 @@ class ProjectBuilds:
     def unfollow_projects(self, site: 'LGTMSite'):
         for project in self.projects:
             time.sleep(1)
+
             if project.realProject():
                 site.unfollow_repository_by_id(project.id)
             else:
@@ -81,7 +90,7 @@ class ProjectBuilds:
 
                 # A failed protoproject build will always be intrepreted to LGTM as a project that can't be found.
                 if 'code' in data and data['code'] == 404:
-                    return
+                    continue
 
                 site.unfollow_proto_repository_by_id(project.id)
 
