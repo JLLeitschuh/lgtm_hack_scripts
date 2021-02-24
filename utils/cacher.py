@@ -27,6 +27,13 @@ class ProjectBuild:
             if 'code' in data and data['code'] == 404:
                 return False
 
+            # In this case, the protoproject likely succeeded. To confirm this,
+            # we check the language status to confirm the build succeeded.
+            for language in data['languages']:
+                if language['status'] == "success":
+                    self.id = data['id']
+                    return True
+
         return (
             not self.build_in_progress(followed_projects) and
             not self.build_failed(followed_projects)
