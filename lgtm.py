@@ -246,7 +246,16 @@ class LGTMSite:
     @staticmethod
     def retrieve_project(gh_project_path: str):
         url = "https://lgtm.com/api/v1.0/projects/g/" + gh_project_path
-        r = requests.get(url)
+
+        session = requests.Session()
+
+        retries = Retry(total=3,
+            backoff_factor=0.1,
+            status_forcelist=[ 500, 502, 503, 504 ])
+
+        session.mount('https://', HTTPAdapter(max_retries=retries))
+
+        r = session.get(url)
         return r.json()
 
     @staticmethod
