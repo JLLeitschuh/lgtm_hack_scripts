@@ -331,7 +331,6 @@ class LGTMDataFilters:
         return projects_sorted[org]
 
     @staticmethod
-    # TODO: This probably needs to be inside the SimpleProject class.
     def build_simple_project(project: dict) -> SimpleProject:
         org: str
         display_name: str
@@ -360,10 +359,9 @@ class LGTMDataFilters:
             key = the_project['key']
             project_type = "realProject"
         else:
-            # I don't know why this is here. Considering we have a new setup where
-            # we check the object to see if it's a valid project via is_valid_project, could
-            # we not just set is_valid_project to False and let the code elsewhere catch this problem?
-            raise KeyError('\'realProject\' nor \'protoproject\' in %s' % str(project))
+            # We raise this in cases where we can't intrepret the data we get
+            # back from LGTM.
+            is_valid_project = False
 
         return SimpleProject(
             display_name=display_name,
