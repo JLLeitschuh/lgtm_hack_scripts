@@ -307,31 +307,6 @@ class LGTMDataFilters:
             simple_project = LGTMDataFilters.build_simple_project(project)
             if not simple_project.is_valid_project:
                 continue
-            # org: str
-            # display_name: str
-            # key: str
-            # is_protoproject: bool
-            # if 'protoproject' in project:
-            #     the_project = project['protoproject']
-            #     if 'https://github.com/' not in the_project['cloneUrl']:
-            #         # Not really concerned with BitBucket right now
-            #         continue
-            #     display_name = the_project['displayName']
-            #     org = display_name.split('/')[0]
-            #     key = the_project['key']
-            #     is_protoproject = True
-            # elif 'realProject' in project:
-            #
-            #     the_project = project['realProject'][0]
-            #     if the_project['repoProvider'] != 'github_apps':
-            #         # Not really concerned with BitBucket right now
-            #         continue
-            #     org = str(the_project['slug']).split('/')[1]
-            #     display_name = the_project['displayName']
-            #     key = the_project['key']
-            #     is_protoproject = False
-            # else:
-            #     raise KeyError('\'realProject\' nor \'protoproject\' in %s' % str(project))
 
             ids_list: List[SimpleProject]
             if simple_project.org in org_to_ids:
