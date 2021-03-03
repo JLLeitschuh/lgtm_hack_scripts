@@ -40,7 +40,8 @@ def find_and_save_projects_to_lgtm(language: str) -> List[str]:
             simple_project = LGTMDataFilters.build_simple_project(saved_project)
 
             if simple_project.is_valid_project:
-                saved_project_data.append(f'{simple_project.display_name},{simple_project.key},{simple_project.project_type}')
+                saved_data = f'{simple_project.display_name},{simple_project.key},{simple_project.project_type}'
+                saved_project_data.append(saved_data)
 
     return saved_project_data
 

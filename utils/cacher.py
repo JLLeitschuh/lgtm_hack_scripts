@@ -167,6 +167,7 @@ def get_project_builds(cached_file: str) -> ProjectBuilds:
         project_data.remove("")
 
     for i, project in enumerate(project_data):
+        # Any way we can just make this a SimpleProject and not a ProjectBuild?
         project_data[i] = ProjectBuild({
             "display_name": project.split(",")[0],
             "key": project.split(",")[1],

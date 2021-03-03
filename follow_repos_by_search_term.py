@@ -28,7 +28,8 @@ def find_and_save_projects_to_lgtm(language: str, search_term: str) -> List[str]
     for date_range in utils.github_dates.generate_dates():
         repos = github.search_repositories(query=f'stars:>5 language:{language} fork:false created:{date_range} {search_term}')
 
-        # TODO: This occasionally returns requests.exceptions.ConnectionError which is annoying as hell. It would be nice if we built in exception handling.
+        # TODO: This occasionally returns requests.exceptions.ConnectionError which is annoying as hell.
+        # It would be nice if we built in exception handling.
         for repo in repos:
             # Github has rate limiting in place hence why we add a sleep here. More info can be found here:
             # https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting
@@ -42,7 +43,8 @@ def find_and_save_projects_to_lgtm(language: str, search_term: str) -> List[str]
             simple_project = LGTMDataFilters.build_simple_project(saved_project)
 
             if simple_project.is_valid_project:
-                saved_project_data.append(f'{simple_project.display_name},{simple_project.key},{simple_project.project_type}')
+                saved_data = f'{simple_project.display_name},{simple_project.key},{simple_project.project_type}'
+                saved_project_data.append(saved_data)
 
     return saved_project_data
 
