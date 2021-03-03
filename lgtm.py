@@ -284,6 +284,8 @@ class SimpleProject:
     display_name: str
     key: str
     is_protoproject: bool
+    is_valid_project: bool
+    org: str
 
     def make_post_data(self):
         data_dict_key = 'protoproject_key' if self.is_protoproject else 'project_key'
@@ -302,43 +304,42 @@ class LGTMDataFilters:
         """
         org_to_ids = {}
         for project in projects:
-            org: str
-            display_name: str
-            key: str
-            is_protoproject: bool
-            if 'protoproject' in project:
-                the_project = project['protoproject']
-                if 'https://github.com/' not in the_project['cloneUrl']:
-                    # Not really concerned with BitBucket right now
-                    continue
-                display_name = the_project['displayName']
-                org = display_name.split('/')[0]
-                key = the_project['key']
-                is_protoproject = True
-            elif 'realProject' in project:
-
-                the_project = project['realProject'][0]
-                if the_project['repoProvider'] != 'github_apps':
-                    # Not really concerned with BitBucket right now
-                    continue
-                org = str(the_project['slug']).split('/')[1]
-                display_name = the_project['displayName']
-                key = the_project['key']
-                is_protoproject = False
-            else:
-                raise KeyError('\'realProject\' nor \'protoproject\' in %s' % str(project))
+            simple_project = LGTMDataFilters.build_simple_project(project)
+            if not simple_project.is_valid_project:
+                continue
+            # org: str
+            # display_name: str
+            # key: str
+            # is_protoproject: bool
+            # if 'protoproject' in project:
+            #     the_project = project['protoproject']
+            #     if 'https://github.com/' not in the_project['cloneUrl']:
+            #         # Not really concerned with BitBucket right now
+            #         continue
+            #     display_name = the_project['displayName']
+            #     org = display_name.split('/')[0]
+            #     key = the_project['key']
+            #     is_protoproject = True
+            # elif 'realProject' in project:
+            #
+            #     the_project = project['realProject'][0]
+            #     if the_project['repoProvider'] != 'github_apps':
+            #         # Not really concerned with BitBucket right now
+            #         continue
+            #     org = str(the_project['slug']).split('/')[1]
+            #     display_name = the_project['displayName']
+            #     key = the_project['key']
+            #     is_protoproject = False
+            # else:
+            #     raise KeyError('\'realProject\' nor \'protoproject\' in %s' % str(project))
 
             ids_list: List[SimpleProject]
-            if org in org_to_ids:
-                ids_list = org_to_ids[org]
+            if simple_project.org in org_to_ids:
+                ids_list = org_to_ids[simple_project.org]
             else:
                 ids_list = []
-                org_to_ids[org] = ids_list
-            ids_list.append(SimpleProject(
-                display_name=display_name,
-                key=key,
-                is_protoproject=is_protoproject
-            ))
+                org_to_ids[simple_project.org] = ids_list
+            ids_list.append(simple_project)
 
         return org_to_ids
 
@@ -348,3 +349,44 @@ class LGTMDataFilters:
             print('org %s not found in projects list' % org)
             return []
         return projects_sorted[org]
+
+    @staticmethod
+    def build_simple_project(project: dict) -> SimpleProject:
+        org: str
+        display_name: str
+        key: str
+        is_protoproject: bool
+        is_valid_project: bool = True
+
+        if 'protoproject' in project:
+            the_project = project['protoproject']
+            if 'https://github.com/' not in the_project['cloneUrl']:
+                # Not really concerned with BitBucket right now
+                is_valid_project = False
+            display_name = the_project['displayName']
+            org = display_name.split('/')[0]
+            key = the_project['key']
+            is_protoproject = True
+        elif 'realProject' in project:
+
+            the_project = project['realProject'][0]
+            if the_project['repoProvider'] != 'github_apps':
+                # Not really concerned with BitBucket right now
+                is_valid_project = False
+            org = str(the_project['slug']).split('/')[1]
+            display_name = the_project['displayName']
+            key = the_project['key']
+            is_protoproject = False
+        else:
+            # I don't know why this is here. Considering we have a new setup where
+            # we check the object to see if it's a valid project, could we not just
+            # set is_valid_project to False and let the code elsewhere catch that?
+            raise KeyError('\'realProject\' nor \'protoproject\' in %s' % str(project))
+
+        return SimpleProject(
+            display_name=display_name,
+            key=key,
+            is_protoproject=is_protoproject,
+            is_valid_project=is_valid_project,
+            org=org
+        )
