@@ -359,8 +359,8 @@ class LGTMDataFilters:
             is_protoproject = False
         else:
             # I don't know why this is here. Considering we have a new setup where
-            # we check the object to see if it's a valid project, could we not just
-            # set is_valid_project to False and let the code elsewhere catch that?
+            # we check the object to see if it's a valid project via is_valid_project, could
+            # we not just set is_valid_project to False and let the code elsewhere catch this problem?
             raise KeyError('\'realProject\' nor \'protoproject\' in %s' % str(project))
 
         return SimpleProject(
