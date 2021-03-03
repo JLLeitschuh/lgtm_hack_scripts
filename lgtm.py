@@ -337,7 +337,7 @@ class LGTMDataFilters:
         key: str
         project_type: str
         is_valid_project: bool = True
-        state: str
+        state: str = ""
 
         if 'protoproject' in project:
             the_project = project['protoproject']
