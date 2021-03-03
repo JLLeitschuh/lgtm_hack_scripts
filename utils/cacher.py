@@ -47,6 +47,9 @@ class ProjectBuild(SimpleProject):
         for project in followed_projects:
             simple_project = LGTMDataFilters.build_simple_project(project)
 
+            if not simple_project.is_valid_project:
+                continue
+
             if not simple_project.display_name == self.display_name:
                 continue
 
@@ -66,7 +69,10 @@ class ProjectBuild(SimpleProject):
         for project in followed_projects:
             simple_project = LGTMDataFilters.build_simple_project(project)
 
-            if (simple_project.display_name == self.display_name):
+            if not simple_project.is_valid_project:
+                continue
+
+            if simple_project.display_name == self.display_name:
                 currently_followed = True
                 break
 
