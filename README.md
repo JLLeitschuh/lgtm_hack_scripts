@@ -67,6 +67,9 @@ python3 follow_repos_by_search_term.py <LANGUAGE> <SEARCH_TERM> <CUSTOM_LIST_NAM
 
 # Finds top repositories that have a minimum 500 stars and use the provided programming language.
 python3 follow_top_repos_by_star_count.py <LANGUAGE> <CUSTOM_LIST_NAME>(optional)
+
+# Unfollows all projects you're currently following that are not in a custom list.
+python3 unfollow_all_followed_projects.py
 ```
 
 ## The Custom Projects Lists Feature
@@ -104,7 +107,7 @@ LGTM can't move projects that are being processed into custom lists. To resolve 
 
 > The <CACHED_FILE_NAME> can't be processed at this time because a project build is still in progress.
 
-If you receive this error, wait a few hours and run the script again. 
+If you receive this error, wait a few hours and run the script again.
 
 ## Legal
 
