@@ -59,18 +59,17 @@ class ProjectBuild:
         for project in followed_projects:
             simple_project = LGTMDataFilters.build_simple_project(project)
 
-            if simple_project.display_name == self.display_name:
-                if simple_project.is_protoproject() and simple_project.state == state:
-                    in_state = True
-                    break
+            if not simple_project.display_name == self.display_name:
+                continue
 
-                # Real projects always have successful builds, or at least as far as I can tell.
-                if not simple_project.is_protoproject():
-                    if state == "build_attempt_in_progress" or state == "build_attempt_failed":
-                        in_state == False
-                    else:
-                        in_state = True
-                    break
+            if simple_project.is_protoproject() and simple_project.state == state:
+                in_state = True
+                break
+
+            # Real projects always have successful builds, or at least as far as I can tell.
+            if not simple_project.is_protoproject():
+                in_state = !(state == "build_attempt_in_progress" or state == "build_attempt_failed")
+                break
 
         return in_state
 
