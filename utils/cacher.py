@@ -5,21 +5,9 @@ from lgtm import LGTMSite, LGTMRequestException, LGTMDataFilters
 
 # This is very similar to SimpleProject. If I had discovered SimpleProject earlier
 # I would have built this code around that.
-class ProjectBuild:
-    def __init__(self, project: dict):
-        self.project = project
-        self.display_name = project["display_name"]
-        self.key = project["key"]
-        self.type = project["type"]
-
-    def realProject(self) -> bool:
-        return self.type == "realProject"
-
-    def protoproject(self) -> bool:
-        return self.type == "protoproject"
-
+class ProjectBuild(SimpleProject):
     def build_successful(self, followed_projects: List[dict]) -> bool:
-        if self.protoproject:
+        if self.is_protoproject():
             # A throttle that although may not be necessary a nice plus.
             time.sleep(2)
             site = LGTMSite.create_from_file()
@@ -74,15 +62,15 @@ class ProjectBuild:
         return in_state
 
     def project_currently_followed(self, followed_projects: List[dict]) -> bool:
-        part_of_followed_projects = False
+        currently_followed = False
         for project in followed_projects:
             simple_project = LGTMDataFilters.build_simple_project(project)
 
             if (simple_project.display_name == self.display_name):
-                part_of_followed_projects = True
+                currently_followed = True
                 break
 
-        return part_of_followed_projects
+        return currently_followed
 
 class ProjectBuilds:
     def __init__(self, projects: List[ProjectBuild]):
@@ -92,9 +80,7 @@ class ProjectBuilds:
         for project in self.projects:
             time.sleep(2)
 
-            if project.realProject():
-                self.unfollow_real_project(project.key)
-            else:
+            if project.is_protoproject():
                 data = site.retrieve_project(project.display_name)
 
                 # A failed protoproject build will always be intrepreted to LGTM
@@ -103,6 +89,9 @@ class ProjectBuilds:
                     continue
 
                 self.unfollow_proto_project(data['id'])
+            else:
+                self.unfollow_real_project(project.key)
+
 
     def unfollow_proto_project(id: int):
         try:
@@ -160,22 +149,24 @@ def write_project_data_to_file(project_keys: List[str], file_name: str):
 def get_project_builds(cached_file: str) -> ProjectBuilds:
     file = open(cached_file, "r")
 
-    project_data = file.read().split("\n")
+    cached_projects = file.read().split("\n")
 
     while("" in project_data):
-        project_data.remove("")
+        cached_projects.remove("")
 
-    for i, project in enumerate(project_data):
-        # Any way we can just make this a SimpleProject and not a ProjectBuild?
-        project_data[i] = ProjectBuild({
+    for i, project in enumerate(cached_projects):
+        cached_projects[i] = ProjectBuild({
             "display_name": project.split(",")[0],
             "key": project.split(",")[1],
-            "type": project.split(",")[2],
+            "project_type": project.split(",")[2],
+            "is_valid_project": True,
+            "org": "",
+            "state": ""
         })
 
     file.close()
 
-    return ProjectBuilds(project_data)
+    return ProjectBuilds(cached_projects)
 
 def remove_file(file_name: str):
     os.remove(file_name)
