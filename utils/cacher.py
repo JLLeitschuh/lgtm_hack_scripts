@@ -41,13 +41,13 @@ class ProjectBuild:
 
     def build_in_progress(self, followed_projects: List[dict]) -> bool:
         return (
-            self.project_part_of_cache(followed_projects) and
+            self.project_currently_followed(followed_projects) and
             self.project_state("build_attempt_in_progress", followed_projects)
         )
 
     def build_failed(self, followed_projects: List[dict]) -> bool:
         return (
-            self.project_part_of_cache(followed_projects) and
+            self.project_currently_followed(followed_projects) and
             self.project_state("build_attempt_failed", followed_projects)
         )
 
@@ -70,7 +70,7 @@ class ProjectBuild:
 
         return in_state
 
-    def project_part_of_cache(self, followed_projects: List[dict]) -> bool:
+    def project_currently_followed(self, followed_projects: List[dict]) -> bool:
         part_of_cache = False
         for project in followed_projects:
             if (
