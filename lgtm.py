@@ -38,7 +38,7 @@ class LGTMSite:
 
     def get_my_projects(self) -> List[dict]:
         '''
-        Returns a user's projects.
+        Returns a user's followed projects that are not in a custom list.
 
                 Returns:
                         data (List[dict]): Response data from LGTM
