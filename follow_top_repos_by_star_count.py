@@ -1,5 +1,5 @@
 from typing import List
-from lgtm import LGTMSite
+from lgtm import LGTMSite, LGTMDataFilters
 
 import utils.github_dates
 import utils.github_api
@@ -37,17 +37,10 @@ def find_and_save_projects_to_lgtm(language: str) -> List[str]:
                 continue
 
             saved_project = save_project_to_lgtm(site, repo.full_name)
+            simple_project = LGTMDataFilters.build_simple_project(saved_project)
 
-            # TODO: This process is duplicated elsewhere and should be under one location
-            if "realProject" in saved_project:
-                saved_project_name = saved_project['realProject'][0]['displayName']
-                saved_project_id = saved_project['realProject'][0]['key']
-                saved_project_data.append(f'{saved_project_name},{saved_project_id},realProject')
-
-            if "protoproject" in saved_project:
-                saved_project_name = saved_project['protoproject']['displayName']
-                saved_project_id = saved_project['protoproject']['key']
-                saved_project_data.append(f'{saved_project_name},{saved_project_id},protoproject')
+            if simple_project.is_valid_project:
+                saved_project_data.append(f'{simple_project.display_name},{simple_project.key},{simple_project.project_type}')
 
     return saved_project_data
 
