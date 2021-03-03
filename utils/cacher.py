@@ -9,7 +9,7 @@ class ProjectBuild:
     def __init__(self, project: dict):
         self.project = project
         self.display_name = project["display_name"]
-        self.id = project["id"]
+        self.key = project["key"]
         self.type = project["type"]
 
     def realProject(self) -> bool:
@@ -33,7 +33,7 @@ class ProjectBuild:
             # we check the language status to confirm the build succeeded.
             for language in data['languages']:
                 if language['status'] == "success":
-                    self.id = data['id']
+                    self.key = data['id']
                     return True
 
         return (
@@ -92,7 +92,7 @@ class ProjectBuilds:
             time.sleep(2)
 
             if project.realProject():
-                self.unfollow_real_project(project.id)
+                self.unfollow_real_project(project.key)
             else:
                 data = site.retrieve_project(project.display_name)
 
@@ -118,19 +118,19 @@ class ProjectBuilds:
         try:
             time.sleep(2)
 
-            site.unfollow_repository_by_id(data['id'])
+            site.unfollow_repository_by_id(id)
         except LGTMRequestException as e:
             print(f"An unknown issue occurred unfollowing {project.display_name}")
 
     def return_successful_project_builds(self, site: 'LGTMSite') -> List[str]:
-        filtered_project_ids: List[str] = []
+        filtered_project_keys: List[str] = []
         followed_projects = site.get_my_projects()
 
         for project in self.projects:
             if project.build_successful(followed_projects):
-                filtered_project_ids.append(project.id)
+                filtered_project_keys.append(project.key)
 
-        return filtered_project_ids
+        return filtered_project_keys
 
     def build_processes_in_progress(self, followed_projects: List[dict]) -> bool:
         in_progress = False
@@ -146,13 +146,13 @@ def create_cache_folder():
     if not os.path.exists('cache'):
         os.makedirs('cache')
 
-def write_project_data_to_file(project_ids: List[str], file_name: str):
+def write_project_data_to_file(project_keys: List[str], file_name: str):
     create_cache_folder()
 
     file = open("cache/" + file_name + ".txt", "a")
 
-    for project_id in project_ids:
-        file.write(project_id + "\n")
+    for project_key in project_keys:
+        file.write(project_key + "\n")
 
     file.close()
 
@@ -167,7 +167,7 @@ def get_project_builds(cached_file: str) -> ProjectBuilds:
     for i, project in enumerate(project_data):
         project_data[i] = ProjectBuild({
             "display_name": project.split(",")[0],
-            "id": project.split(",")[1],
+            "key": project.split(",")[1],
             "type": project.split(",")[2],
         })
 
