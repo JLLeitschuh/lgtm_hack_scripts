@@ -57,18 +57,20 @@ class ProjectBuild:
         in_state = False
 
         for project in followed_projects:
-            if project.get('protoproject') is not None and project.get('protoproject')['displayName'] == self.display_name and project.get('protoproject')['state'] == state:
-                in_state = True
-                break
+            simple_project = LGTMDataFilters.build_simple_project(project)
 
-            # Real projects always have successful builds, or at least as far as I can tell.
-            if project.get('realProject') is not None and project.get('realProject')[0]['displayName'] == self.display_name:
-                if state == "build_attempt_in_progress" or state == "build_attempt_failed":
-                    in_state == False
-                else:
+            if simple_project.display_name == self.display_name:
+                if simple_project.is_protoproject() and simple_project.state == state:
                     in_state = True
+                    break
 
-                break
+                # Real projects always have successful builds, or at least as far as I can tell.
+                if not simple_project.is_protoproject():
+                    if state == "build_attempt_in_progress" or state == "build_attempt_failed":
+                        in_state == False
+                    else:
+                        in_state = True
+                    break
 
         return in_state
 
