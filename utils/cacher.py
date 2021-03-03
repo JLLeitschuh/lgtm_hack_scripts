@@ -1,12 +1,14 @@
 from typing import List
 import os
 import time
-from lgtm import LGTMSite, LGTMRequestException
+from lgtm import LGTMSite, LGTMRequestException, LGTMDataFilters
 
+# This is very similar to SimpleProject. If I had discovered SimpleProject earlier
+# I would have built this code around that.
 class ProjectBuild:
     def __init__(self, project: dict):
         self.project = project
-        self.name = project["name"]
+        self.display_name = project["display_name"]
         self.id = project["id"]
         self.type = project["type"]
 
@@ -21,7 +23,7 @@ class ProjectBuild:
             # A throttle that although may not be necessary a nice plus.
             time.sleep(2)
             site = LGTMSite.create_from_file()
-            data = site.retrieve_project(self.name)
+            data = site.retrieve_project(self.display_name)
 
             # A failed protoproject build will always be intrepreted to LGTM as a project that can't be found.
             if 'code' in data and data['code'] == 404:
@@ -55,12 +57,12 @@ class ProjectBuild:
         in_state = False
 
         for project in followed_projects:
-            if project.get('protoproject') is not None and project.get('protoproject')['displayName'] == self.name and project.get('protoproject')['state'] == state:
+            if project.get('protoproject') is not None and project.get('protoproject')['displayName'] == self.display_name and project.get('protoproject')['state'] == state:
                 in_state = True
                 break
 
             # Real projects always have successful builds, or at least as far as I can tell.
-            if project.get('realProject') is not None and project.get('realProject')[0]['displayName'] == self.name:
+            if project.get('realProject') is not None and project.get('realProject')[0]['displayName'] == self.display_name:
                 if state == "build_attempt_in_progress" or state == "build_attempt_failed":
                     in_state == False
                 else:
@@ -71,16 +73,15 @@ class ProjectBuild:
         return in_state
 
     def project_currently_followed(self, followed_projects: List[dict]) -> bool:
-        part_of_cache = False
+        part_of_followed_projects = False
         for project in followed_projects:
-            if (
-                project.get('protoproject') is not None and project.get('protoproject')['displayName'] == self.name or
-                project.get('realProject') is not None and project.get('realProject')[0]['displayName'] == self.name
-                ):
-                part_of_cache = True
+            simple_project = LGTMDataFilters.build_simple_project(project)
+
+            if (simple_project.display_name == self.display_name):
+                part_of_followed_projects = True
                 break
 
-        return part_of_cache
+        return part_of_followed_projects
 
 class ProjectBuilds:
     def __init__(self, projects: List[ProjectBuild]):
@@ -93,7 +94,7 @@ class ProjectBuilds:
             if project.realProject():
                 self.unfollow_real_project(project.id)
             else:
-                data = site.retrieve_project(project.name)
+                data = site.retrieve_project(project.display_name)
 
                 # A failed protoproject build will always be intrepreted to LGTM
                 # as a project that can't be found.
@@ -119,7 +120,7 @@ class ProjectBuilds:
 
             site.unfollow_repository_by_id(data['id'])
         except LGTMRequestException as e:
-            print(f"An unknown issue occurred unfollowing {project.name}")
+            print(f"An unknown issue occurred unfollowing {project.display_name}")
 
     def return_successful_project_builds(self, site: 'LGTMSite') -> List[str]:
         filtered_project_ids: List[str] = []
@@ -165,7 +166,7 @@ def get_project_builds(cached_file: str) -> ProjectBuilds:
 
     for i, project in enumerate(project_data):
         project_data[i] = ProjectBuild({
-            "name": project.split(",")[0],
+            "display_name": project.split(",")[0],
             "id": project.split(",")[1],
             "type": project.split(",")[2],
         })
