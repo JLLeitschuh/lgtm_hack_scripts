@@ -293,6 +293,11 @@ class SimpleProject:
             data_dict_key: self.key
         }
 
+    def project_type(self) -> str:
+        if is_protoproject:
+            return 'protoproject'
+        elif not is_protoproject:
+            return 'realProject'
 
 class LGTMDataFilters:
 
