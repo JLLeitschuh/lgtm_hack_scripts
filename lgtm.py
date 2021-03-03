@@ -134,7 +134,7 @@ class LGTMSite:
         org_to_projects = LGTMDataFilters.org_to_ids(self.get_my_projects())
         for org in org_to_projects:
             for project in org_to_projects[org]:
-                if not project.is_protoproject:
+                if not project.is_protoproject():
                     continue
                 self.force_rebuild_project(project)
 
@@ -186,7 +186,7 @@ class LGTMSite:
         self._make_lgtm_post(url, data)
 
     def unfollow_repository(self, simple_project: 'SimpleProject'):
-        url = "https://lgtm.com/internal_api/v0.2/unfollowProject" if not simple_project.is_protoproject \
+        url = "https://lgtm.com/internal_api/v0.2/unfollowProject" if not simple_project.is_protoproject() \
             else "https://lgtm.com/internal_api/v0.2/unfollowProtoproject"
         data = simple_project.make_post_data()
         self._make_lgtm_post(url, data)
@@ -194,7 +194,7 @@ class LGTMSite:
     def unfollow_repository_by_org(self, org: str, include_protoproject: bool = False):
         projects_under_org = self.get_my_projects_under_org(org)
         for project in projects_under_org:
-            if not include_protoproject and project.is_protoproject:
+            if not include_protoproject and project.is_protoproject():
                 print("Not unfollowing project since it is a protoproject. %s" % project)
                 continue
             print('Unfollowing project %s' % project.display_name)
@@ -280,24 +280,24 @@ class LGTMSite:
 
 
 @dataclass
+# TODO: this SimpleProject is no longer 'simple'. Some refactoring here could be nice.
 class SimpleProject:
     display_name: str
     key: str
-    is_protoproject: bool
+    project_type: str
     is_valid_project: bool
     org: str
+    state: str
 
     def make_post_data(self):
-        data_dict_key = 'protoproject_key' if self.is_protoproject else 'project_key'
+        data_dict_key = 'protoproject_key' if self.is_protoproject() else 'project_key'
         return {
             data_dict_key: self.key
         }
 
-    def project_type(self) -> str:
-        if is_protoproject:
-            return 'protoproject'
-        elif not is_protoproject:
-            return 'realProject'
+    def is_protoproject(self):
+        # The values for project_type should be hardcoded in one central location
+        return self.project_type == "protoproject"
 
 class LGTMDataFilters:
 
@@ -331,12 +331,14 @@ class LGTMDataFilters:
         return projects_sorted[org]
 
     @staticmethod
+    # TODO: This probably needs to be inside the SimpleProject class.
     def build_simple_project(project: dict) -> SimpleProject:
         org: str
         display_name: str
         key: str
-        is_protoproject: bool
+        project_type: str
         is_valid_project: bool = True
+        state: str
 
         if 'protoproject' in project:
             the_project = project['protoproject']
@@ -344,11 +346,11 @@ class LGTMDataFilters:
                 # Not really concerned with BitBucket right now
                 is_valid_project = False
             display_name = the_project['displayName']
+            state = the_project['state']
             org = display_name.split('/')[0]
             key = the_project['key']
-            is_protoproject = True
+            project_type = 'protoproject'
         elif 'realProject' in project:
-
             the_project = project['realProject'][0]
             if the_project['repoProvider'] != 'github_apps':
                 # Not really concerned with BitBucket right now
@@ -356,7 +358,7 @@ class LGTMDataFilters:
             org = str(the_project['slug']).split('/')[1]
             display_name = the_project['displayName']
             key = the_project['key']
-            is_protoproject = False
+            project_type = "realProject"
         else:
             # I don't know why this is here. Considering we have a new setup where
             # we check the object to see if it's a valid project via is_valid_project, could
@@ -366,7 +368,8 @@ class LGTMDataFilters:
         return SimpleProject(
             display_name=display_name,
             key=key,
-            is_protoproject=is_protoproject,
+            project_type=project_type,
             is_valid_project=is_valid_project,
-            org=org
+            org=org,
+            state=state
         )
