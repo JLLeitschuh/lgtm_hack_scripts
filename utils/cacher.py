@@ -92,7 +92,7 @@ class ProjectBuilds:
                 # latest id from LGTM then unfollow it.
                 data = site.retrieve_project(project.display_name)
 
-                # A failed protoproject build will always be intrepreted to LGTM
+                # A failed protoproject build will be intrepreted to LGTM
                 # as a project that can't be found.
                 if 'code' in data and data['code'] == 404:
                     continue
