@@ -173,13 +173,6 @@ def get_project_builds(cached_file: str) -> ProjectBuilds:
             state=""
         )
 
-            # display_name: str
-            # key: str
-            # project_type: str
-            # is_valid_project: bool
-            # org: str
-            # state: str
-
     file.close()
 
     return ProjectBuilds(cached_projects)
