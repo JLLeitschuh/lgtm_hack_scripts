@@ -1,5 +1,4 @@
-from lgtm import LGTMSite, SimpleProject, LGTMDataFilters
-import time
+from lgtm import LGTMSite, LGTMDataFilters
 
 site = LGTMSite.create_from_file()
 
