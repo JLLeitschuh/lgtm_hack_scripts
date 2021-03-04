@@ -376,4 +376,6 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+cache/*
+
 # End of https://www.toptal.com/developers/gitignore/api/java,pycharm+all,intellij+all,python,macos,windows,linux

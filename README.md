@@ -63,11 +63,51 @@ python3 move_org_projects_under_project_list_then_unfollow.py <LGTM_PROJECT_LIST
 python3 follow_repos_by_search_term_via_code_instances.py <LANGUAGE> <SEARCH_TERM>
 
 # Finds repositories given a search term. Under the hood, the script searches Github for repositories that match the provided search term.
-python3 follow_repos_by_search_term.py <LANGUAGE> <SEARCH_TERM>
+python3 follow_repos_by_search_term.py <LANGUAGE> <SEARCH_TERM> <CUSTOM_LIST_NAME>(optional)
 
 # Finds top repositories that have a minimum 500 stars and use the provided programming language.
-python3 follow_top_repos_by_star_count.py <LANGUAGE>  
+python3 follow_top_repos_by_star_count.py <LANGUAGE> <CUSTOM_LIST_NAME>(optional)
+
+# Unfollows all projects you're currently following that are not in a custom list.
+python3 unfollow_all_followed_projects.py
 ```
+
+## The Custom Projects Lists Feature
+In developing these collection of scripts, we realized that when a user follows thousands of repos in their LGTM account, there is a chance that the LGTM account will break. You won't be able to use the query console and some API
+calls will be broken.
+
+To resolve this, we decided to create a feature users can opt-in. The "Custom Projects Lists" feature does the following:
+
+- Follows all repos (aka project) in your LGTM account.
+- Stores every project you follow in a txt file.
+- At a later date (we suggest 24 hours), the user may run a follow-up command that will take the repos followed, add them to a LGTM custom list, and finally unfollow the projects in the user's LGTM account.
+
+Although these steps are tedious, this is the best work-around we've found. We avoid bricking the LGTM account when projects are placed in custom lists. Also, we typically wait 24 hours since if the project is new to LGTM it will want to first process the project and projects being processed can't be added to custom lists.
+
+Finally, by having custom lists we hope that the security researcher will have an easier time picking which repos they want to test.
+
+### How To Run The Custom Projects Lists Feature
+In some of the commands above, you will see the <CUSTOM_LIST_NAME> option. This is optional for all
+commands. This CUSTOM_LIST_NAME represents the name of a LGTM project list that will be created and used to add projects to. Any projects found from that command will then be added to the LGTM custom list. Let's show an example below to get a better idea of how this works:
+
+1. Run a command passing in the name of the custom list name. The command below will follow Javascript repos and generate a cache file of every repo you follow for the project list called "cool_javascript_projects".
+
+    `python3 follow_top_repos_by_star_count.py javascript big_ole_js_projects`
+
+2. Wait 1 - 24 hours.
+
+3. Run the command below. This will take a cached file you created earlier, create a LGTM custom project list, add the projects to that project list, and finally unfollow the repositories in your LGTM account.
+
+    `python3 move_repos_to_lgtm_lists.py`
+
+Note: When naming a project custom list name, please use alphanumeric, dashes, and underscore characters only.
+
+### Build Processes By LGTM
+LGTM can't move projects that are being processed into custom lists. To resolve this, we've added a check that confirms whether or not all projects you plan on moving to a custom list are processed. If a project isn't processed, we will not move any projects into the custom list and you'll receive the following error:
+
+> The <CACHED_FILE_NAME> can't be processed at this time because a project build is still in progress.
+
+If you receive this error, wait a few hours and run the script again.
 
 ## Legal
 

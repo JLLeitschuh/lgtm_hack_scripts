@@ -72,7 +72,7 @@ for org in org_to_projects:
     project_list_name = gh_org_to_project_list_name[org]
     project_list_id = site.get_or_create_project_list(project_list_name)
     for project in org_to_projects[org]:
-        if project.is_protoproject:
+        if project.is_protoproject():
             print('Unable to add project to project list since it is a protoproject. %s' % project)
             continue
         site.load_into_project_list(project_list_id, [project.key])

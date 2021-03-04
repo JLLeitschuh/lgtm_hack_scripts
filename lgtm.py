@@ -3,7 +3,8 @@ from typing import Optional, List, Dict
 
 import requests
 import yaml
-
+from urllib3.util.retry import Retry
+from requests.adapters import HTTPAdapter
 
 class LGTMRequestException(Exception):
     pass
@@ -36,6 +37,13 @@ class LGTMSite:
         return r.json()
 
     def get_my_projects(self) -> List[dict]:
+        '''
+        Returns a user's followed projects that are not in a custom list.
+
+                Returns:
+                        data (List[dict]): Response data from LGTM
+        '''
+
         url = 'https://lgtm.com/internal_api/v0.2/getMyProjects?apiVersion=' + self.api_version
         data = self._make_lgtm_get(url)
         if data['status'] == 'success':
@@ -44,28 +52,57 @@ class LGTMSite:
             raise LGTMRequestException('LGTM GET request failed with response: %s' % str(data))
 
     def get_my_projects_under_org(self, org: str) -> List['SimpleProject']:
+        '''
+        Given an org name, returns a user's projects that are part of an org.
+
+                Parameters:
+                        org (str): An organization
+
+                Returns:
+                        projects (['SimpleProject']): List of SimpleProject's from LGTM part of an org.
+        '''
+
         projects_sorted = LGTMDataFilters.org_to_ids(self.get_my_projects())
         return LGTMDataFilters.extract_project_under_org(org, projects_sorted)
 
     def _make_lgtm_post(self, url: str, data: dict) -> dict:
+        '''
+        Makes a HTTP post request to LGTM.com
+
+                Parameters:
+                        url (str): A URL representing where the HTTP request goes
+                        data (dict): Data that will be sent to LGTM.com in the request..
+
+                Returns:
+                        data (dict): Data returned from LGTM.com response.
+        '''
+
         api_data = {
             'apiVersion': self.api_version
         }
         full_data = {**api_data, **data}
-        print(data)
-        r = requests.post(
+
+        session = requests.Session()
+
+        retries = Retry(total=3,
+            backoff_factor=0.1,
+            status_forcelist=[ 500, 502, 503, 504 ])
+
+        session.mount('https://', HTTPAdapter(max_retries=retries))
+
+        r = session.post(
             url,
             full_data,
             cookies=self._cookies(),
             headers=self._headers()
         )
+
         try:
             data_returned = r.json()
         except ValueError as e:
             response_text = r.text
             raise LGTMRequestException(f'Failed to parse JSON. Response was: {response_text}') from e
 
-        print(data_returned)
         if data_returned['status'] == 'success':
             if 'data' in data_returned:
                 return data_returned['data']
@@ -75,6 +112,14 @@ class LGTMSite:
             raise LGTMRequestException('LGTM POST request failed with response: %s' % str(data_returned))
 
     def load_into_project_list(self, into_project: int, lgtm_project_ids: List[str]):
+        '''
+        Given a project list id and a list of project ids, add the projects to the project list on LGTM.com.
+
+                Parameters:
+                        into_project (int): Project list id
+                        lgtm_project_ids (List[str]): List of project ids
+        '''
+
         url = "https://lgtm.com/internal_api/v0.2/updateProjectSelection"
         # Because LGTM uses some wacky format for it's application/x-www-form-urlencoded data
         list_serialized = ', '.join([('"' + str(elem) + '"') for elem in lgtm_project_ids])
@@ -89,7 +134,7 @@ class LGTMSite:
         org_to_projects = LGTMDataFilters.org_to_ids(self.get_my_projects())
         for org in org_to_projects:
             for project in org_to_projects[org]:
-                if not project.is_protoproject:
+                if not project.is_protoproject():
                     continue
                 self.force_rebuild_project(project)
 
@@ -104,23 +149,44 @@ class LGTMSite:
         except LGTMRequestException:
             print('Failed rebuilding project. This may be because it is already being built. `%s`' % simple_project)
 
-    def follow_repository(self, repository_url: str):
+    def follow_repository(self, repository_url: str) -> dict:
         url = "https://lgtm.com/internal_api/v0.2/followProject"
         data = {
             'url': repository_url,
             'apiVersion': self.api_version
         }
-        self._make_lgtm_post(url, data)
+        return self._make_lgtm_post(url, data)
 
     def unfollow_repository_by_id(self, project_id: str):
+        '''
+        Given a project id, unfollows a repository.
+
+                Parameters:
+                        project_id (str): A project id
+        '''
+
         url = "https://lgtm.com/internal_api/v0.2/unfollowProject"
         data = {
             'project_key': project_id,
         }
         self._make_lgtm_post(url, data)
 
+    def unfollow_proto_repository_by_id(self, project_id: str):
+        '''
+        Given a project id, unfollows the proto repository.
+
+                Parameters:
+                        project_id (str): A project id
+        '''
+
+        url = "https://lgtm.com/internal_api/v0.2/unfollowProtoproject"
+        data = {
+            'protoproject_key': project_id,
+        }
+        self._make_lgtm_post(url, data)
+
     def unfollow_repository(self, simple_project: 'SimpleProject'):
-        url = "https://lgtm.com/internal_api/v0.2/unfollowProject" if not simple_project.is_protoproject \
+        url = "https://lgtm.com/internal_api/v0.2/unfollowProject" if not simple_project.is_protoproject() \
             else "https://lgtm.com/internal_api/v0.2/unfollowProtoproject"
         data = simple_project.make_post_data()
         self._make_lgtm_post(url, data)
@@ -128,7 +194,7 @@ class LGTMSite:
     def unfollow_repository_by_org(self, org: str, include_protoproject: bool = False):
         projects_under_org = self.get_my_projects_under_org(org)
         for project in projects_under_org:
-            if not include_protoproject and project.is_protoproject:
+            if not include_protoproject and project.is_protoproject():
                 print("Not unfollowing project since it is a protoproject. %s" % project)
                 continue
             print('Unfollowing project %s' % project.display_name)
@@ -180,7 +246,16 @@ class LGTMSite:
     @staticmethod
     def retrieve_project(gh_project_path: str):
         url = "https://lgtm.com/api/v1.0/projects/g/" + gh_project_path
-        r = requests.get(url)
+
+        session = requests.Session()
+
+        retries = Retry(total=3,
+            backoff_factor=0.1,
+            status_forcelist=[ 500, 502, 503, 504 ])
+
+        session.mount('https://', HTTPAdapter(max_retries=retries))
+
+        r = session.get(url)
         return r.json()
 
     @staticmethod
@@ -205,17 +280,24 @@ class LGTMSite:
 
 
 @dataclass
+# TODO: this SimpleProject is no longer 'simple'. Some refactoring here could be nice.
 class SimpleProject:
     display_name: str
     key: str
-    is_protoproject: bool
+    project_type: str
+    is_valid_project: bool
+    org: str
+    state: str
 
     def make_post_data(self):
-        data_dict_key = 'protoproject_key' if self.is_protoproject else 'project_key'
+        data_dict_key = 'protoproject_key' if self.is_protoproject() else 'project_key'
         return {
             data_dict_key: self.key
         }
 
+    def is_protoproject(self):
+        # The values for project_type should be hardcoded in one central location
+        return self.project_type == "protoproject"
 
 class LGTMDataFilters:
 
@@ -227,43 +309,17 @@ class LGTMDataFilters:
         """
         org_to_ids = {}
         for project in projects:
-            org: str
-            display_name: str
-            key: str
-            is_protoproject: bool
-            if 'protoproject' in project:
-                the_project = project['protoproject']
-                if 'https://github.com/' not in the_project['cloneUrl']:
-                    # Not really concerned with BitBucket right now
-                    continue
-                display_name = the_project['displayName']
-                org = display_name.split('/')[0]
-                key = the_project['key']
-                is_protoproject = True
-            elif 'realProject' in project:
-
-                the_project = project['realProject'][0]
-                if the_project['repoProvider'] != 'github_apps':
-                    # Not really concerned with BitBucket right now
-                    continue
-                org = str(the_project['slug']).split('/')[1]
-                display_name = the_project['displayName']
-                key = the_project['key']
-                is_protoproject = False
-            else:
-                raise KeyError('\'realProject\' nor \'protoproject\' in %s' % str(project))
+            simple_project = LGTMDataFilters.build_simple_project(project)
+            if not simple_project.is_valid_project:
+                continue
 
             ids_list: List[SimpleProject]
-            if org in org_to_ids:
-                ids_list = org_to_ids[org]
+            if simple_project.org in org_to_ids:
+                ids_list = org_to_ids[simple_project.org]
             else:
                 ids_list = []
-                org_to_ids[org] = ids_list
-            ids_list.append(SimpleProject(
-                display_name=display_name,
-                key=key,
-                is_protoproject=is_protoproject
-            ))
+                org_to_ids[simple_project.org] = ids_list
+            ids_list.append(simple_project)
 
         return org_to_ids
 
@@ -273,3 +329,45 @@ class LGTMDataFilters:
             print('org %s not found in projects list' % org)
             return []
         return projects_sorted[org]
+
+    @staticmethod
+    def build_simple_project(project: dict) -> SimpleProject:
+        org: str
+        display_name: str
+        key: str
+        project_type: str
+        is_valid_project: bool = True
+        state: str = ""
+
+        if 'protoproject' in project:
+            the_project = project['protoproject']
+            if 'https://github.com/' not in the_project['cloneUrl']:
+                # Not really concerned with BitBucket right now
+                is_valid_project = False
+            display_name = the_project['displayName']
+            state = the_project['state']
+            org = display_name.split('/')[0]
+            key = the_project['key']
+            project_type = 'protoproject'
+        elif 'realProject' in project:
+            the_project = project['realProject'][0]
+            if the_project['repoProvider'] != 'github_apps':
+                # Not really concerned with BitBucket right now
+                is_valid_project = False
+            org = str(the_project['slug']).split('/')[1]
+            display_name = the_project['displayName']
+            key = the_project['key']
+            project_type = "realProject"
+        else:
+            # We raise this in cases where we can't intrepret the data we get
+            # back from LGTM.
+            is_valid_project = False
+
+        return SimpleProject(
+            display_name=display_name,
+            key=key,
+            project_type=project_type,
+            is_valid_project=is_valid_project,
+            org=org,
+            state=state
+        )
