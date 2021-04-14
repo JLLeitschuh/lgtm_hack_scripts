@@ -67,6 +67,9 @@ python3 follow_repos_by_search_term.py <LANGUAGE> <SEARCH_TERM>
 
 # Finds top repositories that have a minimum 500 stars and use the provided programming language.
 python3 follow_top_repos_by_star_count.py <LANGUAGE>  
+
+# Re-runs failed project builds in an attempt to get the build to succeed.
+python3 rebuild_all_following_projects.py
 ```
 
 ## Legal
