@@ -3,7 +3,7 @@ from typing import Optional, List, Dict
 
 import requests
 import yaml
-
+import time
 
 class LGTMRequestException(Exception):
     pass
@@ -91,6 +91,8 @@ class LGTMSite:
             for project in org_to_projects[org]:
                 if not project.is_protoproject:
                     continue
+
+                time.sleep(1)
                 self.force_rebuild_project(project)
 
     def force_rebuild_project(self, simple_project: 'SimpleProject'):

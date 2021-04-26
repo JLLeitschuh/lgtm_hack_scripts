@@ -59,14 +59,14 @@ python3 unfollow_org.py <GITHUB_ORG_TO_UNFOLLOW>
 # Finds all repositories for a specified Github Organization and adds them to your specified LGTM account's project list.
 python3 move_org_projects_under_project_list_then_unfollow.py <LGTM_PROJECT_LIST_NAME> <GITHUB_ORG>
 
-# Finds repositories given a search term. Under the hood, the script first looks for instances in code of the search term provided and then follows the repos of those code instances
-python3 follow_repos_by_search_term_via_code_instances.py <LANGUAGE> <SEARCH_TERM>
-
 # Finds repositories given a search term. Under the hood, the script searches Github for repositories that match the provided search term.
 python3 follow_repos_by_search_term.py <LANGUAGE> <SEARCH_TERM>
 
 # Finds top repositories that have a minimum 500 stars and use the provided programming language.
 python3 follow_top_repos_by_star_count.py <LANGUAGE>  
+
+# Re-runs failed project builds in an attempt to get the build to succeed.
+python3 rebuild_all_following_projects.py
 ```
 
 ## Legal
