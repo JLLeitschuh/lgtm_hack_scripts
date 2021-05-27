@@ -16,7 +16,10 @@ project_list_name_to_gh_org = {
     'Apache_Projects': ['apache'],
     'AirBnB_Projects': ['airbnb'],
     'LinkedIn_Projects': ['linkedin'],
-    'Netflix_Projects': ['Netflix'],
+    'Netflix_Projects': [
+        'Netflix',
+        'nebula-plugins'
+    ],
     'OpenTracing_Projects': ['opentracing', 'opentracing-contrib'],
     'Spring_Projects': ['spring-projects'],
     'Jenkins_Projects': ['jenkinsci'],
@@ -41,6 +44,9 @@ project_list_name_to_gh_org = {
     'DataDog_Projects': ['DataDog'],
     'Micronaut_Projects': ['micronaut-projects'],
     'Apple_Projects': ['apple'],
+    'Gradle_Plugin_Projects': [
+        'nebula-plugins',
+    ]
 }
 
 project_list_to_repo = {
@@ -54,6 +60,12 @@ project_list_to_repo = {
         'trib3/leakycauldron',
         'ZupIT/charlescd',
         'waikato-datamining/adams-applications'
+    ],
+    'Gradle_Plugin_Projects': [
+        'diffplug/spotless',
+        'diffplug/blowdryer',
+        'diffplug/spotless-changelog',
+        'spring-cloud/spring-cloud-contract',
     ]
 }
 
