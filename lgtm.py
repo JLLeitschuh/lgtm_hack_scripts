@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Callable
 
 import requests
 import yaml
@@ -31,11 +31,11 @@ class LGTMSite:
         }
 
     def _make_lgtm_get(self, url: str) -> dict:
-        r = requests.get(
+        r = LGTMSite._resilient_request(lambda: requests.get(
             url,
             cookies=self._cookies(),
             headers=self._headers()
-        )
+        ))
         return r.json()
 
     def get_my_projects(self) -> List[dict]:
@@ -56,17 +56,12 @@ class LGTMSite:
         }
         full_data = {**api_data, **data}
         print(data)
-        try:
-            r = requests.post(
-                url,
-                full_data,
-                cookies=self._cookies(),
-                headers=self._headers()
-            )
-        except SSLError as e:
-            if retry_count < 4:
-                return self._make_lgtm_post(url, data, retry_count + 1)
-            raise LGTMRequestException(f'SSL Error') from e
+        r = LGTMSite._resilient_request(lambda: requests.post(
+            url,
+            full_data,
+            cookies=self._cookies(),
+            headers=self._headers()
+        ))
         try:
             data_returned = r.json()
         except ValueError as e:
@@ -188,9 +183,18 @@ class LGTMSite:
         pass
 
     @staticmethod
+    def _resilient_request(request_method: Callable[[], requests.Response], retry_count: int = 0):
+        try:
+            return request_method()
+        except SSLError as e:
+            if retry_count < 4:
+                return LGTMSite._resilient_request(request_method, retry_count + 1)
+            raise LGTMRequestException(f'SSL Error') from e
+
+    @staticmethod
     def retrieve_project(gh_project_path: str):
         url = "https://lgtm.com/api/v1.0/projects/g/" + gh_project_path
-        r = requests.get(url)
+        r = LGTMSite._resilient_request(lambda: requests.get(url))
         return r.json()
 
     @staticmethod
