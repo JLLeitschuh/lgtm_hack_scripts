@@ -5,6 +5,9 @@ import requests
 import yaml
 import time
 
+from requests.exceptions import SSLError
+
+
 class LGTMRequestException(Exception):
     pass
 
@@ -47,18 +50,23 @@ class LGTMSite:
         projects_sorted = LGTMDataFilters.org_to_ids(self.get_my_projects())
         return LGTMDataFilters.extract_project_under_org(org, projects_sorted)
 
-    def _make_lgtm_post(self, url: str, data: dict) -> dict:
+    def _make_lgtm_post(self, url: str, data: dict, retry_count: int = 0) -> dict:
         api_data = {
             'apiVersion': self.api_version
         }
         full_data = {**api_data, **data}
         print(data)
-        r = requests.post(
-            url,
-            full_data,
-            cookies=self._cookies(),
-            headers=self._headers()
-        )
+        try:
+            r = requests.post(
+                url,
+                full_data,
+                cookies=self._cookies(),
+                headers=self._headers()
+            )
+        except SSLError as e:
+            if retry_count < 4:
+                return self._make_lgtm_post(url, data, retry_count + 1)
+            raise LGTMRequestException(f'SSL Error') from e
         try:
             data_returned = r.json()
         except ValueError as e:

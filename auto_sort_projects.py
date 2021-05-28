@@ -44,9 +44,8 @@ project_list_name_to_gh_org = {
     'DataDog_Projects': ['DataDog'],
     'Micronaut_Projects': ['micronaut-projects'],
     'Apple_Projects': ['apple'],
-    'Gradle_Plugin_Projects': [
-        'nebula-plugins',
-    ]
+    'Gradle_Plugin_Projects': ['nebula-plugins'],
+    'Open_Rewrite_Projects': ['openrewrite'],
 }
 
 project_list_to_repo = {
@@ -66,6 +65,16 @@ project_list_to_repo = {
         'diffplug/blowdryer',
         'diffplug/spotless-changelog',
         'spring-cloud/spring-cloud-contract',
+        'JetBrains/gradle-intellij-plugin',
+        'JetBrains/gradle-jps-compiler-plugin',
+        'JetBrains/gradle-grammar-kit-plugin',
+        'JetBrains/gradle-changelog-plugin',
+        'JetBrains/gradle-idea-ext-plugin',
+        'JetBrains/gradle-node-envs',
+        'JetBrains/gradle-python-envs',
+        'JetBrains/gradle-ruby-envs',
+        'JetBrains/gradle-intellij-plugin',
+        'openrewrite/rewrite-gradle-plugin',
     ]
 }
 

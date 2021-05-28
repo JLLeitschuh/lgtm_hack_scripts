@@ -1,6 +1,6 @@
 import argparse
 
-from lgtm import LGTMSite
+from lgtm import LGTMSite, LGTMRequestException
 
 
 def main():
@@ -13,7 +13,10 @@ def main():
     for line in args.in_file:
         line_clean = line.strip()
         print('Following: %s' % line_clean)
-        site.follow_repository(line_clean)
+        try:
+            site.follow_repository(line_clean)
+        except LGTMRequestException:
+            print('Failed to follow: %s' % line_clean)
 
 
 if __name__ == "__main__":
