@@ -38,6 +38,17 @@ github:
     api_key:        # The Github API token. You can create one here: https://github.com/settings/tokens/new. The token should have no permissions.
 ```
 
+## Installation
+
+```bash
+# Clone the repo
+git clone https://github.com/JLLeitschuh/lgtm_hack_scripts.git
+
+# Install the necessary python libraries
+pip3 install PyGithub
+pip3 install pyyaml
+```
+
 ## Commands
 
 ```bash
