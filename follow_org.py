@@ -25,8 +25,7 @@ def get_languages() -> List[str]:
         languages = sys.argv[2].split(',')
         formatted_languages = [language.capitalize() for language in languages]
         return formatted_languages
-    else:
-        return default_languages
+    return default_languages
 
 
 def load_repository_list(org: str) -> List[str]:
