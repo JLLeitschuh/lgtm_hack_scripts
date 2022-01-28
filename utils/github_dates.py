@@ -6,6 +6,7 @@ def current_year() -> int:
     now = datetime.now()
     return now.year
 
+
 def generate_dates() -> List[str]:
     date_ranges: List[str] = []
 

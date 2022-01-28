@@ -125,6 +125,7 @@ class LGTMSite:
         self._make_lgtm_post(url, data)
 
     def unfollow_repository(self, simple_project: 'SimpleProject'):
+        print(f'Unfollowing: {simple_project.display_name}')
         url = "https://lgtm.com/internal_api/v0.2/unfollowProject" if not simple_project.is_protoproject \
             else "https://lgtm.com/internal_api/v0.2/unfollowProtoproject"
         data = simple_project.make_post_data()
@@ -220,8 +221,8 @@ class LGTMSite:
 
 @dataclass
 class SimpleProject:
-    display_name: str
-    key: str
+    display_name: str  # The repository name, e.g. `gradle/gradle` or `github/codeql`
+    key: str  # The LGTM key for this project. Unique identifier for LGTM.com
     is_protoproject: bool
 
     def make_post_data(self):
