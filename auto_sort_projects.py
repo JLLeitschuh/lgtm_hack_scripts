@@ -15,6 +15,10 @@ project_list_name_to_gh_org = {
     ],
     'Apache_Projects': ['apache'],
     'AirBnB_Projects': ['airbnb'],
+    'Amazon_Projects': [
+        'aws',
+        'awslabs',
+    ],
     'LinkedIn_Projects': ['linkedin'],
     'Netflix_Projects': [
         'Netflix',
@@ -27,7 +31,11 @@ project_list_name_to_gh_org = {
     'Square_Projects': ['square'],
     'Gradle_Projects': ['gradle'],
     'PortSwigger_Projects': ['PortSwigger'],
-    'Wildlfy_Projects': ['wildfly', 'jbosstools'],
+    'Wildlfy_Projects': [
+        'wildfly',
+        'jbosstools',
+        'keycloak',
+    ],
     'Graphite_Projects': ['graphite-project'],
     'Openmrs_Projects': ['openmrs'],
     'JetBrains_Projects': ['JetBrains'],
@@ -35,6 +43,7 @@ project_list_name_to_gh_org = {
         'eclipse',
         'eclipse-ee4j',
         'eclipse-theia',
+        'eclipse-vertx',
     ],
     'Microsoft_Projects': ['microsoft', 'Azure'],
     'PayPal_Projects': ['paypal'],
@@ -46,6 +55,21 @@ project_list_name_to_gh_org = {
     'Apple_Projects': ['apple'],
     'Gradle_Plugin_Projects': ['nebula-plugins'],
     'Open_Rewrite_Projects': ['openrewrite'],
+    'Oracle_Projects': ['oracle'],
+    'Sonatype_Projects': ['sonatype'],
+    'WPI_Projects': [
+        'wpilibsuite',
+        'WPIRoboticsProjects',
+    ],
+    'US_Government_Projects': [
+        'CDCgov',
+        'NationalSecurityAgency',
+    ],
+    'Mozilla_Projects': [
+        'mozilla',
+        'mozilla-mobile',
+    ],
+    'wso2_Projects': ['wso2'],
 }
 
 project_list_to_repo = {
@@ -184,6 +208,7 @@ project_list_to_repo = {
         'essentials/Essentials',
         'kbastani/spring-cloud-microservice-example',
         'square/javapoet',
+        'signalapp/Signal-Android',
     ],
 }
 

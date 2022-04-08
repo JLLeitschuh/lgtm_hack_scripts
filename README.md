@@ -21,7 +21,7 @@ need to extract manually while interacting with the [LGTM.com](https://lgtm.com)
 
 ### Using this Project
 
-In order to extract these 'keys' for uses by these scripts, we recommend that your browser's develper tools
+In order to extract these 'keys' for uses by these scripts, we recommend that your browser's developer tools
 and inspect the various requests normally made under the 'Network' tab. This information should be put inside of a
 file named `config.yml` inside the repositories root directory. This `config.yml` file is already part of the
 `.gitignore` so adding it to this repository will not risk you accidentally committing it.
@@ -63,7 +63,7 @@ python3 move_org_projects_under_project_list_then_unfollow.py <LGTM_PROJECT_LIST
 python3 follow_repos_by_search_term.py <LANGUAGE> <SEARCH_TERM>
 
 # Finds top repositories that have a minimum 500 stars and use the provided programming language.
-python3 follow_top_repos_by_star_count.py <LANGUAGE>  
+python3 follow_top_repos_by_star_count.py <LANGUAGE>
 
 # Re-runs failed project builds in an attempt to get the build to succeed.
 python3 rebuild_all_following_projects.py
